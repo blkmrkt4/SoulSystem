@@ -13,174 +13,111 @@ interface RuleItem {
   locked?: boolean;
 }
 
-const rules: RuleItem[] = [
+interface RuleGroup {
+  label: string;
+  rules: RuleItem[];
+}
+
+const RULE_GROUPS: RuleGroup[] = [
   {
-    key: 'glassmorphism',
-    name: 'Glassmorphism',
-    description: 'Frosted-glass backgrounds with blur and transparency',
-    previewClass: 'pp-glass',
+    label: 'Visual tells',
+    rules: [
+      { key: 'glassmorphism', name: 'Glassmorphism', description: 'Frosted-glass backgrounds with blur and transparency', previewClass: 'pp-glass' },
+      { key: 'gradient-text', name: 'Gradient text', description: 'Text filled with colour gradients', previewClass: 'pp-gradient-text' },
+      { key: 'glow', name: 'Glow effects', description: 'Luminous halos around elements', previewClass: 'pp-glow' },
+      { key: 'centered', name: 'Centered layout', description: 'Content centred on the page with max-width', previewClass: 'pp-centered' },
+      { key: 'pure-bw', name: 'Pure B&W', description: 'Strictly #000 and #FFF, no tinted neutrals', previewClass: 'pp-pure' },
+      { key: 'side-tab', name: 'Side-tab accent', description: 'Thick coloured stripe on one side of a card — the #1 AI tell', previewClass: 'pp-side-tab' },
+      { key: 'icon-tile', name: 'Icon tile above heading', description: 'Icon-in-rounded-square stacked above a heading', previewClass: 'pp-icon-tile' },
+      { key: 'dark-neon', name: 'Dark mode + neon accents', description: 'Cyan, magenta, electric green over near-black. The "lazy cool" look', previewClass: 'pp-glow' },
+      { key: 'emoji-as-icon', name: 'Emoji as icon', description: 'Reaching for emoji when a real icon set should be used', previewClass: '' },
+      { key: 'floating-badges', name: 'Floating badge stacks', description: 'Multiple "New" / "Beta" / "Featured" pills above every card', previewClass: '' },
+      { key: 'identical-card-grids', name: 'Identical card grids', description: 'Same-sized cards with icon + heading + text repeated endlessly', previewClass: '' },
+      { key: 'hero-metric-layout', name: 'Hero metric layout', description: 'Big number, small label, three stats, gradient accent — the AI dashboard default', previewClass: '' },
+      { key: 'sparklines-decorative', name: 'Sparklines as decoration', description: 'Tiny charts that look sophisticated but convey no real information', previewClass: '' },
+      { key: 'rounded-rect-generic-shadow', name: 'Generic rounded-rect cards', description: 'Rounded rectangles with forgettable drop shadows — the safest, most AI-default shape', previewClass: '' },
+      { key: 'three-card-trio', name: 'Three-card feature trio', description: 'Three balanced feature cards immediately under a hero', previewClass: '' },
+      { key: 'avatar-initials', name: 'Avatar initials circles', description: 'Auto-generated initial circles as user placeholders — specific to AI dashboards', previewClass: '' },
+    ],
   },
   {
-    key: 'gradient-text',
-    name: 'Gradient Text',
-    description: 'Text filled with colour gradients',
-    previewClass: 'pp-gradient-text',
+    label: 'Typography tells',
+    rules: [
+      { key: 'inter', name: 'Inter everywhere', description: 'Using Inter for all text — "the Comic Sans of AI"', previewClass: 'pp-inter' },
+      { key: 'monospace-as-technical', name: 'Monospace as "technical"', description: 'Using monospace to signal developer vibes instead of real type choices', previewClass: '' },
+      { key: 'single-font', name: 'Single font for everything', description: 'One font family across headings, body, labels, buttons — no pairing', previewClass: '' },
+      { key: 'flat-type-hierarchy', name: 'Flat type hierarchy', description: 'Heading, subheading, body all at nearly the same size — no contrast', previewClass: '' },
+      { key: 'overused-fonts', name: 'Overused AI fonts', description: 'Roboto, Open Sans, Geist, Mona Sans, Plus Jakarta — the monoculture', previewClass: '' },
+    ],
   },
   {
-    key: 'glow',
-    name: 'Glow Effects',
-    description: 'Luminous halos around elements',
-    previewClass: 'pp-glow',
+    label: 'Motion tells',
+    rules: [
+      { key: 'bouncy', name: 'Bounce / elastic motion', description: 'Spring physics that feels dated and tacky — use exponential easing instead', previewClass: 'pp-bouncy' },
+    ],
   },
   {
-    key: 'centered',
-    name: 'Centered Layout',
-    description: 'Content centred on the page with max-width',
-    previewClass: 'pp-centered',
+    label: 'Interaction tells',
+    rules: [
+      { key: 'modals', name: 'Modal-heavy interactions', description: 'Modals for non-destructive actions — use side-sheets or inline panels instead', previewClass: 'pp-modal' },
+      { key: 'every-button-primary', name: 'Every button is primary', description: 'When everything shouts equally, nothing reads as primary', previewClass: '' },
+      { key: 'redundant-ux-writing', name: 'Redundant UX writing', description: 'Label + sublabel + helper text all saying the same thing in different words', previewClass: '' },
+      { key: 'amputating-mobile', name: 'Amputating features on mobile', description: '"Not available on mobile" — adapt the interface, don\'t strip it', previewClass: '' },
+      { key: 'generic-hero-copy', name: 'Generic hero copy', description: '"Build the Future" / "Boost your productivity" — placeholder phrasing that ships', previewClass: '' },
+    ],
   },
   {
-    key: 'bouncy',
-    name: 'Bouncy Animations',
-    description: 'Spring physics with playful overshoot',
-    previewClass: 'pp-bouncy',
-  },
-  {
-    key: 'pure-bw',
-    name: 'Pure B&W',
-    description: 'Strictly black and white, no grays',
-    previewClass: 'pp-pure',
-  },
-  {
-    key: 'inter',
-    name: 'Inter Everywhere',
-    description: 'Use Inter for all text, no display font',
-    previewClass: 'pp-inter',
-  },
-  {
-    key: 'side-tab',
-    name: 'Side Tabs',
-    description: 'Vertical tab navigation within sections',
-    previewClass: 'pp-side-tab',
-  },
-  {
-    key: 'icon-tile',
-    name: 'Icon Tiles',
-    description: 'Large tappable icon grid for actions',
-    previewClass: 'pp-icon-tile',
-  },
-  {
-    key: 'modals',
-    name: 'Modal Dialogs',
-    description: 'Pop-up dialogs for confirmations and forms',
-    previewClass: 'pp-modal',
-  },
-  {
-    key: 'nested-cards',
-    name: 'Nested Cards',
-    description: 'Cards inside cards -- always enabled',
-    previewClass: 'pp-cardceptn',
-    locked: true,
+    label: 'Hard-locked (always banned)',
+    rules: [
+      { key: 'nested-cards', name: 'Nested cards', description: 'Cards inside cards inside cards — always banned, not toggleable', previewClass: 'pp-cardceptn', locked: true },
+    ],
   },
 ];
 
-const alwaysOnRules = ['nested-cards'];
+const QUALITY_FLOOR = [
+  'No nested cards (cards inside cards)',
+  'WCAG AA contrast minimum (4.5:1 body, 3:1 large)',
+  'Body text minimum 14px',
+  'Line height minimum 1.3 on multi-line text',
+  'Letter spacing on body text must not exceed 0.05em',
+  'No justified text without hyphenation',
+  'Line length capped at 75ch',
+  'No gray text on coloured backgrounds',
+  'Minimum 8px padding inside bordered containers',
+  'No skipped heading levels (h1 → h3 with no h2)',
+  'Animate transform/opacity only — never width/height/padding/margin',
+  'Every component has empty/loading/error states',
+  'If dual mode: both light and dark equally polished from day one',
+  'Errors expressed in plain language, not codes',
+  'Destructive actions must have undo or escape hatch',
+];
+
+const DARK_PATTERNS = [
+  'Sycophantic AI agreement — assistant always agrees even when wrong',
+  'Unending suggestion loop — no natural endpoint, user never feels done',
+  'Sneaking via summarization — AI subtly alters tone or stance during rewriting',
+  'Hallucinated dark patterns — model autonomously hides cancel buttons or creates forced continuity',
+  'Hidden cancel / opt-out — microscopic gray "no thanks" under a giant accept button',
+  'Fake scarcity — dynamically generated "Only 1 item left" messaging',
+];
 
 function RulePreview({ className }: { className: string }) {
-  if (className === 'pp-glass') {
+  if (!className) {
     return (
-      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-white/40 to-white/10 border border-white/30 backdrop-blur-sm shadow-sm" />
-    );
-  }
-  if (className === 'pp-gradient-text') {
-    return (
-      <div
-        className="text-sm font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text"
-        style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-      >
-        Abc
+      <div className="w-full h-full bg-surface-alt rounded flex items-center justify-center text-[10px] text-text-subtle">
+        AI
       </div>
-    );
-  }
-  if (className === 'pp-glow') {
-    return (
-      <div className="w-8 h-8 rounded-full bg-accent/60 shadow-[0_0_12px_4px_var(--color-accent-soft)]" />
-    );
-  }
-  if (className === 'pp-centered') {
-    return (
-      <div className="w-10 h-10 flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-dashed border-border rounded flex items-center justify-center">
-          <div className="w-2 h-2 bg-accent rounded-sm" />
-        </div>
-      </div>
-    );
-  }
-  if (className === 'pp-bouncy') {
-    return (
-      <div className="w-6 h-6 rounded-full bg-accent animate-bounce" style={{ animationDuration: '0.6s' }} />
     );
   }
   if (className === 'pp-pure') {
     return (
-      <div className="w-10 h-10 flex">
-        <div className="pp-pure-l w-5 h-10 bg-black rounded-l" />
-        <div className="pp-pure-d w-5 h-10 bg-white border border-border rounded-r" />
+      <div className={className}>
+        <div className="pp-pure-l" style={{ height: '50%' }} />
+        <div className="pp-pure-d" style={{ height: '50%' }} />
       </div>
     );
   }
-  if (className === 'pp-inter') {
-    return (
-      <div className="text-sm font-medium text-text" style={{ fontFamily: 'Inter, sans-serif' }}>
-        Aa
-      </div>
-    );
-  }
-  if (className === 'pp-side-tab') {
-    return (
-      <div className="flex w-10 h-10">
-        <div className="w-3 bg-surface border-r border-border flex flex-col gap-1 pt-1 items-center">
-          <div className="w-1.5 h-1.5 bg-accent rounded-sm" />
-          <div className="w-1.5 h-1.5 bg-border rounded-sm" />
-          <div className="w-1.5 h-1.5 bg-border rounded-sm" />
-        </div>
-        <div className="flex-1 bg-surface-alt" />
-      </div>
-    );
-  }
-  if (className === 'pp-icon-tile') {
-    return (
-      <div className="grid grid-cols-2 gap-0.5 w-10 h-10">
-        <div className="bg-accent/20 rounded-sm flex items-center justify-center">
-          <div className="w-2 h-2 bg-accent rounded-sm" />
-        </div>
-        <div className="bg-border/30 rounded-sm flex items-center justify-center">
-          <div className="w-2 h-2 bg-border rounded-sm" />
-        </div>
-        <div className="bg-border/30 rounded-sm flex items-center justify-center">
-          <div className="w-2 h-2 bg-border rounded-sm" />
-        </div>
-        <div className="bg-border/30 rounded-sm flex items-center justify-center">
-          <div className="w-2 h-2 bg-border rounded-sm" />
-        </div>
-      </div>
-    );
-  }
-  if (className === 'pp-modal') {
-    return (
-      <div className="w-10 h-10 relative flex items-center justify-center bg-surface-alt rounded">
-        <div className="absolute inset-0 bg-text/10 rounded" />
-        <div className="w-7 h-5 bg-surface border border-border rounded shadow-sm relative z-10" />
-      </div>
-    );
-  }
-  if (className === 'pp-cardceptn') {
-    return (
-      <div className="w-10 h-10 bg-surface border border-border rounded p-1">
-        <div className="w-full h-full bg-surface-alt border border-border rounded" />
-      </div>
-    );
-  }
-  return <div className="w-10 h-10 bg-border/20 rounded" />;
+  return <div className={`${className} w-full h-full rounded`} />;
 }
 
 function ToggleSwitch({
@@ -194,20 +131,17 @@ function ToggleSwitch({
 }) {
   return (
     <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
+      onClick={disabled ? undefined : onChange}
+      className={`w-9 h-5 rounded-full relative transition-colors shrink-0 ${
+        disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+      } ${checked ? 'bg-accent' : 'bg-border-strong'}`}
+      aria-pressed={checked}
       disabled={disabled}
-      onClick={onChange}
-      className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
-        ${checked ? 'bg-accent' : 'bg-border'}
-        ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
-      `}
     >
       <span
-        className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200
-          ${checked ? 'translate-x-5' : 'translate-x-0'}
-        `}
+        className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
+          checked ? 'left-[18px]' : 'left-0.5'
+        }`}
       />
     </button>
   );
@@ -231,58 +165,87 @@ export default function StepRules() {
       totalSteps={TOTAL_STEPS}
       label="Rules"
       title="Negotiable rules"
-      help="Toggle design patterns on or off. These are preferences, not hard constraints -- they help set the tone."
+      help="Toggle design patterns on or off. Off = banned in this project. On = allowed. The quality floor and dark patterns below are always enforced."
     >
-      <div className="space-y-1 max-w-[700px]">
-        {rules.map((rule) => {
-          const isLocked = rule.locked === true;
-          const isChecked = isLocked ? true : !!currentRules[rule.key];
+      {/* Toggleable rules by group */}
+      {RULE_GROUPS.map((group) => (
+        <div key={group.label} className="mb-6">
+          <h3 className="text-[11px] font-semibold text-text-subtle uppercase tracking-widest mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+            {group.label}
+          </h3>
+          <div className="space-y-1 max-w-[700px]">
+            {group.rules.map((rule) => {
+              const isLocked = rule.locked === true;
+              const isChecked = isLocked ? false : !!currentRules[rule.key];
 
-          return (
-            <div
-              key={rule.key}
-              className={`flex items-center gap-4 px-4 py-3 rounded-xl border border-border bg-surface transition-colors
-                ${isLocked ? 'opacity-40' : 'hover:border-border-strong'}
-              `}
-            >
-              <div className="shrink-0 w-10 h-10 flex items-center justify-center">
-                <RulePreview className={rule.previewClass} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-text">{rule.name}</div>
-                <div className="text-xs text-text-muted">{rule.description}</div>
-              </div>
-              <div className="shrink-0 flex items-center gap-2">
-                <span className={`text-[10px] font-medium ${
-                  isLocked
-                    ? 'text-text-subtle'
-                    : isChecked
-                    ? 'text-emerald-600'
-                    : 'text-text-subtle'
-                }`}>
-                  {isLocked ? 'Always banned' : isChecked ? 'Allowed' : 'Banned'}
-                </span>
-                <ToggleSwitch
-                  checked={isChecked}
-                  onChange={() => toggleRule(rule.key)}
-                  disabled={isLocked}
-                />
-              </div>
-            </div>
-          );
-        })}
+              return (
+                <div
+                  key={rule.key}
+                  className={`flex items-center gap-4 px-4 py-3 rounded-xl border border-border bg-surface transition-colors
+                    ${isLocked ? 'opacity-40' : 'hover:border-border-strong'}`}
+                >
+                  <div className="shrink-0 w-10 h-10 flex items-center justify-center overflow-hidden rounded">
+                    <RulePreview className={rule.previewClass} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-text">{rule.name}</div>
+                    <div className="text-xs text-text-muted">{rule.description}</div>
+                  </div>
+                  <div className="shrink-0 flex items-center gap-2">
+                    <span className={`text-[10px] font-medium ${
+                      isLocked
+                        ? 'text-text-subtle'
+                        : isChecked
+                        ? 'text-emerald-600'
+                        : 'text-text-subtle'
+                    }`}>
+                      {isLocked ? 'Always banned' : isChecked ? 'Allowed' : 'Banned'}
+                    </span>
+                    <ToggleSwitch
+                      checked={isChecked}
+                      onChange={() => toggleRule(rule.key)}
+                      disabled={isLocked}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      {/* Quality floor */}
+      <div className="mt-8 max-w-[700px]">
+        <h3 className="text-[11px] font-semibold text-text-subtle uppercase tracking-widest mb-3" style={{ fontFamily: 'var(--font-mono)' }}>
+          Quality floor — always enforced
+        </h3>
+        <div className="bg-surface-alt border-l-[3px] border-accent rounded-r-xl px-5 py-4">
+          <ul className="m-0 p-0 list-none space-y-1.5">
+            {QUALITY_FLOOR.map((item) => (
+              <li key={item} className="text-xs text-text-muted flex items-start gap-2">
+                <span className="text-accent mt-0.5 shrink-0">&#10003;</span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
-      <div className="mt-6 max-w-[700px] px-4 py-3 bg-surface-alt border border-border rounded-xl">
-        <div
-          className="text-[11px] text-text-subtle uppercase tracking-widest mb-1"
-          style={{ fontFamily: 'var(--font-mono)' }}
-        >
-          Always on
+      {/* AI dark patterns */}
+      <div className="mt-6 max-w-[700px]">
+        <h3 className="text-[11px] font-semibold text-text-subtle uppercase tracking-widest mb-3" style={{ fontFamily: 'var(--font-mono)' }}>
+          AI dark patterns — always forbidden
+        </h3>
+        <div className="bg-red-50 border-l-[3px] border-danger rounded-r-xl px-5 py-4">
+          <ul className="m-0 p-0 list-none space-y-1.5">
+            {DARK_PATTERNS.map((item) => (
+              <li key={item} className="text-xs text-red-700 flex items-start gap-2">
+                <span className="text-danger mt-0.5 shrink-0">&#10007;</span>
+                {item}
+              </li>
+            ))}
+          </ul>
         </div>
-        <p className="text-xs text-text-muted m-0">
-          <span className="font-medium text-text">Nested cards</span> -- cards inside cards is always enabled and cannot be turned off.
-        </p>
       </div>
     </StepSection>
   );

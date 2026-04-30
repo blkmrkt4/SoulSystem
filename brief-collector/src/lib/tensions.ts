@@ -300,6 +300,46 @@ const rules: TensionRule[] = [
     }
     return null;
   },
+
+  // Register-based tensions
+  (s) => {
+    if (s.project.register === 'brand' && s.shape.density === 'compact') {
+      return {
+        id: 'brand-compact',
+        steps: ['step-shape', 'step-project'],
+        title: 'Brand register + compact density',
+        message: `Brand sites need breathing room — generous whitespace, expressive layouts. Compact density is for product UI (dashboards, tools). Consider comfortable density for a brand-facing project.`,
+        fields: ['shape.density', 'project.register'],
+      };
+    }
+    return null;
+  },
+
+  (s) => {
+    if (s.project.register === 'product' && s.typography.display === 'display-impact') {
+      return {
+        id: 'product-impact-display',
+        steps: ['step-typography', 'step-project'],
+        title: 'Product register + impact display type',
+        message: `Product UI should stay out of the way — impact display (bold, uppercase, tight) is expressive and attention-grabbing, better suited to brand/marketing pages. Consider a more restrained display type for product.`,
+        fields: ['typography.display', 'project.register'],
+      };
+    }
+    return null;
+  },
+
+  (s) => {
+    if (s.project.register === 'brand' && s.shape.motion === 'snappy') {
+      return {
+        id: 'brand-snappy-motion',
+        steps: ['step-shape', 'step-project'],
+        title: 'Brand register + snappy motion',
+        message: `Brand pages benefit from expressive, considered motion (200–280ms) that reinforces personality. Snappy (120–180ms) is clinical — great for product UI, but underwhelming for brand experiences.`,
+        fields: ['shape.motion', 'project.register'],
+      };
+    }
+    return null;
+  },
 ];
 
 /**

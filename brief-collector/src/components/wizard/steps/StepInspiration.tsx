@@ -489,6 +489,21 @@ export default function StepInspiration() {
           extractionStatus={extractionStatus}
         />
       </SubStep>
+
+      <SubStep
+        title="Anti-references"
+        help="What should this design explicitly NOT look like? Knowing what to avoid is as valuable as knowing what to aim for."
+      >
+        <textarea
+          value={inspiration.antiReferences || ''}
+          onChange={(e) =>
+            updateNestedWizard('inspiration', 'antiReferences', e.target.value)
+          }
+          placeholder={"Not Stripe's restrained palette. Not a generic SaaS dashboard.\nNot dark-mode-by-default. Not the default Tailwind look."}
+          rows={3}
+          className="w-full max-w-lg px-3.5 py-2.5 bg-surface border border-border rounded-lg text-sm text-text placeholder:text-text-subtle focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft transition-colors resize-y"
+        />
+      </SubStep>
     </StepSection>
   );
 }

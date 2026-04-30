@@ -35,6 +35,7 @@ export interface WizardState {
     name: string;
     description: string;
     platform: string[];
+    register: 'brand' | 'product' | '';
     audience: string;
   };
   vibe: string;
@@ -44,6 +45,7 @@ export interface WizardState {
     hexes: string;
     fonts: UploadedFile[];
     swatches: UploadedFile[];
+    antiReferences: string;
   };
   feeling: string[];
   colour: {
@@ -94,9 +96,9 @@ export interface Draft {
 }
 
 export const DEFAULT_WIZARD_STATE: WizardState = {
-  project: { name: '', description: '', platform: [], audience: '' },
+  project: { name: '', description: '', platform: [], register: '', audience: '' },
   vibe: '',
-  inspiration: { urls: '', files: [], hexes: '', fonts: [], swatches: [] },
+  inspiration: { urls: '', files: [], hexes: '', fonts: [], swatches: [], antiReferences: '' },
   feeling: [],
   colour: { accent: '', secondary: '' },
   typography: { display: '', body: '' },
@@ -106,16 +108,37 @@ export const DEFAULT_WIZARD_STATE: WizardState = {
   components: { form: '', empty: '', loading: '', notification: '' },
   hardLimits: '',
   rules: {
+    // Visual tells
     glassmorphism: false,
     'gradient-text': false,
     glow: false,
     centered: false,
-    bouncy: false,
     'pure-bw': false,
-    inter: false,
     'side-tab': false,
     'icon-tile': false,
+    'dark-neon': false,
+    'emoji-as-icon': false,
+    'floating-badges': false,
+    'identical-card-grids': false,
+    'hero-metric-layout': false,
+    'sparklines-decorative': false,
+    'rounded-rect-generic-shadow': false,
+    'three-card-trio': false,
+    // Typography tells
+    inter: false,
+    'monospace-as-technical': false,
+    'single-font': false,
+    'flat-type-hierarchy': false,
+    'overused-fonts': false,
+    // Motion tells
+    bouncy: false,
+    // Interaction tells
     modals: false,
+    'every-button-primary': false,
+    'redundant-ux-writing': false,
+    'amputating-mobile': false,
+    'generic-hero-copy': false,
+    'avatar-initials': false,
   },
   library: { selectedIds: [] },
   admin: { scope: '', extras: [] },

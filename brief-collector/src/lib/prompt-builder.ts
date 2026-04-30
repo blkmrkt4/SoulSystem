@@ -157,6 +157,7 @@ Rules for the bundle:
 - Name: ${s.project.name || '(unnamed)'}
 - Description: ${s.project.description || '(none provided)'}
 - Platform: ${Array.isArray(s.project.platform) ? s.project.platform.join(', ') : s.project.platform || '(not set)'}
+- Register: **${s.project.register || '(not set)'}**${s.project.register === 'brand' ? '\n  Implication: design IS the product — expressive type, strong art direction, asymmetric layouts, motion as expression' : s.project.register === 'product' ? '\n  Implication: design SERVES the product — familiar conventions, restrained palettes, fixed type scales, motion as feedback only' : ''}
 - Audience: ${s.project.audience || '(not specified)'}
 
 ## AESTHETIC
@@ -212,7 +213,12 @@ ${needsVisualAnalysis.map(f => `- ${f.name}`).join('\n')}` : ''}${extracted.leng
 ${extracted.length} file(s) already analysed — extracted colours and fonts are included in the sections above.` : ''}${needsVisualAnalysis.length === 0 && extracted.length > 0 ? `
 
 All uploaded references have been analysed. No files need to be dragged into this conversation.` : ''}
+${s.inspiration.antiReferences ? `
+## ANTI-REFERENCES
 
+What this design should explicitly NOT look like:
+${s.inspiration.antiReferences}
+` : ''}
 ## NAVIGATION & COMPONENTS
 
 - Primary navigation: **${s.navigation.primary || '(not set)'}**
@@ -233,13 +239,30 @@ ${s.hardLimits || '(none specified)'}
 
 ## RULES
 
-ALWAYS-ON (locked, no exceptions):
+QUALITY FLOOR (locked, always enforced):
 - No nested cards (cards inside cards)
 - WCAG AA contrast minimum (4.5:1 body, 3:1 large)
 - Body text minimum 14px
+- Line height minimum 1.3 on multi-line text
+- Letter spacing on body text must not exceed 0.05em
+- No justified text without hyphenation
+- Line length capped at 75ch
+- No gray text on coloured backgrounds
+- Minimum 8px padding inside bordered containers
+- No skipped heading levels (h1 → h3 with no h2)
 - Animate transform/opacity only — never width/height/padding/margin
 - Every component has empty/loading/error states
 - If dual mode: both light and dark equally polished from day one
+- Errors expressed in plain language, not codes
+- Destructive actions must have undo or escape hatch
+
+AI DARK PATTERNS (always forbidden):
+- Sycophantic AI agreement — assistant always agrees even when wrong
+- Unending suggestion loop — no natural endpoint, user never feels done
+- Sneaking via summarization — AI subtly alters tone or stance during rewriting
+- Hallucinated dark patterns — model autonomously hides cancel buttons or creates forced continuity
+- Hidden cancel / opt-out — microscopic gray "no thanks" under a giant accept button
+- Fake scarcity — dynamically generated urgency messaging
 
 NEGOTIABLE — ALLOWED in this project (user toggled on):
 ${enabledRules.length > 0 ? enabledRules.map((r) => `- ${r}`).join('\n') : '- (none)'}

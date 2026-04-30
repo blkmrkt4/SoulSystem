@@ -84,6 +84,30 @@ export default function StepProject() {
           </div>
         </div>
 
+        {/* Register */}
+        <div>
+          <label className="block text-sm font-medium text-text mb-1">
+            Register
+          </label>
+          <p className="text-xs text-text-muted mb-3">
+            This changes how the entire design system is oriented. Brand lets design be expressive; Product keeps design out of the way.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
+            <ChoiceCard
+              selected={project.register === 'brand'}
+              onClick={() => updateNestedWizard('project', 'register', 'brand')}
+              name="Brand"
+              description="Marketing site, landing page, portfolio. Design is the product — expressive type, art direction, asymmetric layouts."
+            />
+            <ChoiceCard
+              selected={project.register === 'product'}
+              onClick={() => updateNestedWizard('project', 'register', 'product')}
+              name="Product"
+              description="App UI, dashboard, tool. Design serves the product — familiar conventions, restrained palettes, fixed type scales."
+            />
+          </div>
+        </div>
+
         <div>
           <label htmlFor="project-audience" className="block text-sm font-medium text-text mb-1.5">
             Target audience <span className="text-text-subtle font-normal">(optional)</span>
