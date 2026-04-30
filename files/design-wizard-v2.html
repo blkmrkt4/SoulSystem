@@ -1,0 +1,2228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Design System Wizard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&family=Playfair+Display:wght@400;500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas: #FAFAF7;
+    --surface: #FFFFFF;
+    --surface-alt: #F4F3EE;
+    --surface-2: #EFEDE6;
+    --border: #E5E3DC;
+    --border-strong: #C9C6BC;
+    --text: #1A1916;
+    --text-muted: #6B6961;
+    --text-subtle: #9B9890;
+    --accent: #2B6CB0;
+    --accent-soft: rgba(43, 108, 176, 0.1);
+    --shadow-sm: 0 1px 2px rgba(28,25,22,0.04);
+    --shadow-md: 0 2px 8px rgba(28,25,22,0.06), 0 1px 2px rgba(28,25,22,0.04);
+    --shadow-lg: 0 8px 24px rgba(28,25,22,0.08), 0 2px 4px rgba(28,25,22,0.04);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--text);
+    font-family: 'Inter Tight', -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font: inherit; cursor: pointer; }
+
+  /* ============ Top bar ============ */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: color-mix(in srgb, var(--canvas) 85%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .brand {
+    font-family: 'Fraunces', serif;
+    font-weight: 500; font-size: 17px;
+    letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+  .progress-meter {
+    display: flex; gap: 10px; align-items: center;
+    font-size: 12px; color: var(--text-subtle);
+  }
+  .progress-bar {
+    width: 140px; height: 4px; background: var(--surface-alt);
+    border-radius: 2px; overflow: hidden;
+  }
+  .progress-fill { height: 100%; background: var(--accent); transition: width 240ms cubic-bezier(0.16, 1, 0.3, 1); }
+  .progress-meter strong { color: var(--text); }
+
+  /* ============ Layout ============ */
+  .page {
+    max-width: 1200px; margin: 0 auto;
+    padding: 56px 24px 140px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 56px;
+  }
+  @media (max-width: 980px) {
+    .page { grid-template-columns: 1fr; gap: 0; }
+    .step-rail { display: none; }
+  }
+
+  /* ============ Step rail ============ */
+  .step-rail {
+    position: sticky; top: 100px;
+    height: fit-content;
+    align-self: start;
+    border-left: 1px solid var(--border);
+    padding-left: 4px;
+  }
+  .step-link {
+    display: block;
+    padding: 8px 16px;
+    margin-left: -2px;
+    border-left: 2px solid transparent;
+    color: var(--text-subtle);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    transition: all 120ms ease;
+    cursor: pointer;
+  }
+  .step-link:hover { color: var(--text-muted); }
+  .step-link.active {
+    color: var(--text);
+    border-left-color: var(--accent);
+    background: linear-gradient(90deg, var(--accent-soft) 0%, transparent 100%);
+  }
+  .step-link .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-subtle);
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* ============ Section ============ */
+  .step-section { margin-bottom: 96px; scroll-margin-top: 88px; }
+  .step-section:last-child { margin-bottom: 0; }
+  .step-header { margin-bottom: 32px; }
+  .step-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-subtle);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .step-title {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+  }
+  .step-help {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 620px;
+    margin: 0;
+    line-height: 1.55;
+  }
+
+  /* ============ Sub-section ============ */
+  .substep { margin-bottom: 40px; }
+  .substep-title {
+    font-size: 17px; font-weight: 600;
+    margin: 0 0 6px;
+    color: var(--text);
+  }
+  .substep-help {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0 0 18px;
+    line-height: 1.5;
+    max-width: 600px;
+  }
+
+  /* ============ Choice cards ============ */
+  .choice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .choice-grid.tight {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .choice-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 200ms cubic-bezier(0.16,1,0.3,1), box-shadow 200ms ease, border-color 150ms ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .choice-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-strong);
+  }
+  .choice-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow-md);
+  }
+  .choice-preview {
+    height: 140px;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+  }
+  .choice-preview.tall { height: 180px; }
+  .choice-preview.short { height: 100px; }
+  .choice-meta { padding: 14px 16px 16px; }
+  .choice-name {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+  }
+  .choice-why {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* ============ Vibe previews ============ */
+  .vibe-quiet { background: #FAFAF7; padding: 22px 18px; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+  .vibe-quiet h4 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 400; color: #1A1916; line-height: 1.2; margin: 0 0 6px; }
+  .vibe-quiet p { font-size: 10px; color: #6B6961; margin: 0 0 10px; line-height: 1.4; }
+  .vibe-quiet span { background: #2B6CB0; color: white; font-size: 10px; padding: 6px 12px; border-radius: 6px; font-weight: 500; width: fit-content; }
+
+  .vibe-technical { background: #0E0E0D; padding: 22px 18px; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+  .vibe-technical h4 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: #EDEBE4; line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .vibe-technical p { font-size: 10px; color: #A39F94; margin: 0 0 10px; font-family: 'JetBrains Mono', monospace; }
+  .vibe-technical span { background: #00FF94; color: #0E0E0D; font-size: 10px; padding: 6px 10px; border-radius: 4px; font-weight: 600; width: fit-content; font-family: 'JetBrains Mono', monospace; }
+
+  .vibe-editorial { background: #F2EDE3; padding: 22px 18px; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+  .vibe-editorial h4 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500; color: #2B1F0F; line-height: 1.1; font-style: italic; margin: 0 0 6px; }
+  .vibe-editorial p { font-size: 10px; color: #6B5544; margin: 0 0 10px; line-height: 1.6; }
+  .vibe-editorial span { background: transparent; color: #8B4A2B; font-size: 10px; padding: 4px 0; border-bottom: 1px solid #8B4A2B; font-weight: 500; width: fit-content; }
+
+  .vibe-bold { background: #FFE600; padding: 22px 18px; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+  .vibe-bold h4 { font-family: 'Manrope', sans-serif; font-size: 22px; font-weight: 700; color: #000; line-height: 1; letter-spacing: -0.03em; margin: 0 0 6px; text-transform: uppercase; }
+  .vibe-bold p { font-size: 10px; color: #000; margin: 0 0 10px; font-weight: 500; }
+  .vibe-bold span { background: #000; color: #FFE600; font-size: 10px; padding: 6px 12px; font-weight: 700; width: fit-content; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .vibe-playful { background: linear-gradient(135deg, #FFE0E9 0%, #E0F0FF 100%); padding: 22px 18px; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+  .vibe-playful h4 { font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 700; color: #2D1B47; line-height: 1.15; margin: 0 0 6px; }
+  .vibe-playful p { font-size: 10px; color: #5C4D7A; margin: 0 0 10px; }
+  .vibe-playful span { background: #7B5BD8; color: white; font-size: 10px; padding: 6px 14px; border-radius: 999px; font-weight: 600; width: fit-content; }
+
+  .vibe-luxe { background: #1A1614; padding: 22px 18px; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+  .vibe-luxe h4 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 300; color: #E8DCC4; line-height: 1.2; font-style: italic; margin: 0 0 6px; }
+  .vibe-luxe p { font-size: 10px; color: #9C8E72; margin: 0 0 10px; letter-spacing: 0.02em; }
+  .vibe-luxe span { background: transparent; color: #C9A961; font-size: 10px; padding: 6px 14px; border: 1px solid #C9A961; font-weight: 400; width: fit-content; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* ============ Upload area ============ */
+  .upload-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .upload-slot {
+    background: var(--surface);
+    border: 2px dashed var(--border-strong);
+    border-radius: 12px;
+    padding: 28px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 150ms ease;
+    position: relative;
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .upload-slot:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .upload-slot.has-file {
+    border-style: solid;
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    padding: 0;
+    overflow: hidden;
+  }
+  .upload-slot.has-file img {
+    width: 100%; height: 100%; object-fit: cover; display: block; min-height: 130px;
+  }
+  .upload-slot input { display: none; }
+  .upload-icon { font-size: 22px; margin-bottom: 6px; opacity: 0.5; }
+  .upload-text { font-size: 12px; color: var(--text-muted); }
+  .upload-hint { font-size: 10px; color: var(--text-subtle); margin-top: 4px; line-height: 1.4; }
+  .upload-remove {
+    position: absolute; top: 6px; right: 6px;
+    width: 22px; height: 22px;
+    background: rgba(0,0,0,0.6); color: white;
+    border-radius: 50%; border: 0;
+    font-size: 14px; line-height: 22px; padding: 0;
+    z-index: 2;
+    display: none;
+  }
+  .upload-slot.has-file .upload-remove { display: block; }
+  .upload-add-more {
+    background: var(--surface-alt);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 12px;
+    width: fit-content;
+    transition: all 150ms ease;
+  }
+  .upload-add-more:hover { border-color: var(--text-muted); color: var(--text); }
+
+  /* ============ Tag cloud ============ */
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag {
+    padding: 7px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 150ms ease;
+  }
+  .tag:hover { border-color: var(--text-muted); color: var(--text); }
+  .tag.selected { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* ============ Color picker ============ */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .color-tile {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    cursor: pointer;
+    position: relative;
+    border: 2px solid transparent;
+    transition: transform 150ms ease;
+  }
+  .color-tile:hover { transform: scale(1.04); }
+  .color-tile.selected {
+    border-color: var(--text);
+    box-shadow: 0 0 0 2px var(--canvas), 0 0 0 4px var(--text);
+  }
+  .color-tile span {
+    position: absolute; bottom: 6px; left: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: white;
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  }
+  .color-tile.light span { color: #1A1916; text-shadow: none; }
+  .custom-color-row {
+    display: flex; gap: 10px; align-items: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px;
+    flex-wrap: wrap;
+  }
+  .custom-color-row label {
+    font-size: 12px; color: var(--text-muted); font-weight: 500;
+  }
+  .custom-color-input {
+    flex: 1; min-width: 120px; height: 32px; padding: 0 10px;
+    border: 1px solid var(--border-strong); border-radius: 6px;
+    font: inherit; font-size: 12px; font-family: 'JetBrains Mono', monospace;
+    background: var(--canvas);
+  }
+  .swatch-upload {
+    margin-top: 12px;
+    background: var(--surface);
+    border: 1px dashed var(--border-strong);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    transition: all 150ms ease;
+  }
+  .swatch-upload:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .swatch-upload input { display: none; }
+
+  /* ============ Toggle list ============ */
+  .toggle-list {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .toggle-row {
+    display: grid;
+    grid-template-columns: 140px 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .toggle-row:last-child { border-bottom: 0; }
+  .toggle-row:hover { background: var(--surface-alt); }
+  .toggle-preview {
+    height: 56px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .toggle-text { display: flex; flex-direction: column; gap: 3px; }
+  .toggle-name { font-weight: 600; font-size: 13px; color: var(--text); }
+  .toggle-why { font-size: 12px; color: var(--text-muted); line-height: 1.45; }
+  .toggle-switch {
+    width: 40px; height: 22px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    transition: background 150ms ease, border-color 150ms ease;
+    flex-shrink: 0;
+  }
+  .toggle-switch::after {
+    content: ''; position: absolute;
+    width: 16px; height: 16px;
+    background: white;
+    border-radius: 50%;
+    top: 2px; left: 2px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .toggle-switch.on { background: var(--accent); border-color: var(--accent); }
+  .toggle-switch.on::after { transform: translateX(18px); }
+
+  /* Toggle previews */
+  .pp-glass { background: linear-gradient(135deg, #6366f1, #ec4899); position: relative; }
+  .pp-glass::after { content: ''; position: absolute; inset: 8px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 5px; border: 1px solid rgba(255,255,255,0.3); }
+  .pp-gradient-text { background: white; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; background-image: linear-gradient(90deg, #8B5CF6, #EC4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .pp-glow { background: #0a0a0a; display: flex; align-items: center; justify-content: center; }
+  .pp-glow::after { content: ''; width: 24px; height: 24px; background: #00FFFF; border-radius: 50%; box-shadow: 0 0 16px #00FFFF, 0 0 32px #00FFFF; }
+  .pp-centered { background: #FAFAF7; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; gap: 1px; }
+  .pp-centered::before { content: 'Title'; font-size: 11px; font-weight: 600; }
+  .pp-centered::after { content: '— subtitle —'; font-size: 8px; color: #999; }
+  @keyframes pp-bouncy { 0%, 100% { transform: translateX(-20px) scale(1); } 50% { transform: translateX(20px) scale(1.3); } }
+  .pp-bouncy { background: var(--surface); display: flex; align-items: center; justify-content: center; }
+  .pp-bouncy::after { content: ''; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; animation: pp-bouncy 1.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; }
+  .pp-pure { display: grid; grid-template-columns: 1fr 1fr; }
+  .pp-pure-l { background: #FFFFFF; }
+  .pp-pure-d { background: #000000; }
+  .pp-inter { background: var(--surface); display: flex; align-items: center; justify-content: center; font-family: -apple-system, sans-serif; font-size: 13px; font-weight: 600; }
+  .pp-side-tab { background: var(--surface); display: flex; align-items: center; justify-content: center; padding: 6px; }
+  .pp-side-tab::after { content: 'Card'; width: 100%; height: 100%; background: white; border: 1px solid var(--border); border-left: 3px solid #8B5CF6; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; font-size: 10px; font-weight: 500; }
+  .pp-icon-tile { background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px; gap: 4px; }
+  .pp-icon-tile::before { content: ''; width: 18px; height: 18px; background: var(--accent); border-radius: 4px; }
+  .pp-icon-tile::after { content: 'Heading'; font-size: 9px; font-weight: 600; }
+  .pp-card-grid { background: var(--surface-alt); display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; padding: 5px; }
+  .pp-card-grid::before, .pp-card-grid::after, .pp-card-grid div { background: white; border-radius: 3px; }
+  .pp-card-grid div { content: ''; }
+  .pp-cardceptn { background: var(--surface); display: flex; align-items: center; justify-content: center; padding: 6px; }
+  .pp-cardceptn::after { content: ''; width: 100%; height: 100%; background: white; border: 1px solid var(--border); border-radius: 4px; padding: 4px; box-shadow: inset 6px 6px 0 var(--surface-alt), inset 8px 8px 0 #fff, inset 14px 14px 0 var(--surface-alt); }
+  .pp-modal { background: var(--surface-alt); display: flex; align-items: center; justify-content: center; }
+  .pp-modal::after { content: 'Are you sure?'; padding: 8px 14px; background: white; border: 1px solid var(--border); border-radius: 6px; box-shadow: var(--shadow-md); font-size: 10px; font-weight: 500; }
+
+  /* ============ Component preview cards (for menu/tooltip choices) ============ */
+  .menu-preview { background: var(--surface); padding: 12px; height: 100%; }
+  .menu-rail { display: flex; gap: 6px; height: 100%; }
+  .menu-rail-icons { background: var(--surface-alt); width: 36px; border-radius: 4px; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+  .menu-rail-icons div { width: 18px; height: 18px; background: var(--border-strong); border-radius: 3px; }
+  .menu-rail-icons div:first-child { background: var(--accent); }
+  .menu-rail-content { flex: 1; padding: 6px; }
+  .menu-rail-content div { height: 5px; background: var(--surface-alt); border-radius: 2px; margin-bottom: 4px; }
+  .menu-rail-content div:first-child { width: 60%; }
+  .menu-rail-content div:nth-child(2) { width: 40%; }
+
+  .menu-top { display: flex; flex-direction: column; height: 100%; gap: 6px; }
+  .menu-top-bar { height: 24px; background: var(--surface-alt); border-radius: 4px; display: flex; gap: 8px; padding: 0 8px; align-items: center; }
+  .menu-top-bar div { width: 30px; height: 8px; background: var(--border-strong); border-radius: 2px; }
+  .menu-top-bar div:first-child { background: var(--accent); }
+  .menu-top-content { flex: 1; padding: 6px; background: var(--surface); border-radius: 4px; }
+  .menu-top-content div { height: 5px; background: var(--surface-alt); border-radius: 2px; margin-bottom: 4px; }
+
+  .menu-sidebar { display: flex; gap: 6px; height: 100%; }
+  .menu-sidebar-nav { background: var(--surface-alt); width: 60px; border-radius: 4px; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+  .menu-sidebar-nav div { display: flex; gap: 4px; align-items: center; padding: 3px; }
+  .menu-sidebar-nav div::before { content: ''; width: 10px; height: 10px; background: var(--border-strong); border-radius: 2px; flex-shrink: 0; }
+  .menu-sidebar-nav div::after { content: ''; height: 4px; background: var(--border-strong); border-radius: 2px; flex: 1; }
+  .menu-sidebar-nav div:first-child::before { background: var(--accent); }
+  .menu-sidebar-nav div:first-child::after { background: var(--accent); }
+  .menu-sidebar-content { flex: 1; padding: 6px; }
+  .menu-sidebar-content div { height: 5px; background: var(--surface-alt); border-radius: 2px; margin-bottom: 4px; }
+
+  .menu-bottom { display: flex; flex-direction: column; height: 100%; gap: 6px; padding: 4px; }
+  .menu-bottom-content { flex: 1; padding: 6px; background: var(--surface-alt); border-radius: 4px; }
+  .menu-bottom-content div { height: 5px; background: var(--surface); border-radius: 2px; margin-bottom: 4px; }
+  .menu-bottom-bar { height: 28px; background: var(--surface-alt); border-radius: 4px; display: flex; gap: 8px; padding: 0 8px; align-items: center; justify-content: space-around; }
+  .menu-bottom-bar div { width: 16px; height: 16px; background: var(--border-strong); border-radius: 3px; }
+  .menu-bottom-bar div:first-child { background: var(--accent); }
+
+  .menu-cmd { background: var(--surface-alt); padding: 12px; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .menu-cmd-box { background: var(--surface); border-radius: 8px; padding: 10px; box-shadow: var(--shadow-md); width: 100%; max-width: 180px; }
+  .menu-cmd-box div:first-child { font-size: 10px; color: var(--text-subtle); margin-bottom: 6px; font-family: 'JetBrains Mono', monospace; }
+  .menu-cmd-box div:not(:first-child) { height: 6px; background: var(--surface-alt); border-radius: 2px; margin-bottom: 4px; }
+  .menu-cmd-box div:nth-child(2) { background: var(--accent-soft); }
+
+  /* Tooltip previews */
+  .tt-instant { background: var(--surface); padding: 14px; height: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .tt-instant::before { content: 'Click here'; padding: 4px 10px; background: var(--accent); color: white; font-size: 10px; border-radius: 4px; }
+  .tt-instant::after { content: 'Helpful tip'; padding: 4px 8px; background: #1A1916; color: white; font-size: 9px; border-radius: 3px; }
+
+  .tt-delayed { background: var(--surface); padding: 14px; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; position: relative; }
+  .tt-delayed::before { content: 'i'; width: 18px; height: 18px; background: var(--surface-alt); border: 1px solid var(--border-strong); color: var(--text-muted); font-size: 11px; font-style: italic; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .tt-delayed span { font-size: 10px; color: var(--text-subtle); font-style: italic; }
+
+  .tt-popover { background: var(--surface); padding: 14px; height: 100%; display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .tt-popover::before { content: '?'; width: 18px; height: 18px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+  .tt-popover::after { content: 'Click for more →'; padding: 6px 8px; background: var(--surface-alt); color: var(--text-muted); font-size: 9px; border-radius: 4px; border: 1px solid var(--border); }
+
+  .tt-none { background: var(--surface); padding: 14px; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .tt-none span { font-size: 11px; color: var(--text-subtle); font-style: italic; }
+
+  /* Empty state previews */
+  .es-illustrated { background: var(--surface); padding: 12px; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; }
+  .es-illustrated::before { content: '📭'; font-size: 24px; }
+  .es-illustrated span { font-size: 10px; color: var(--text-muted); }
+
+  .es-text { background: var(--surface); padding: 12px; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; }
+  .es-text::before { content: 'No items yet'; font-size: 11px; font-weight: 600; color: var(--text); }
+  .es-text::after { content: '+ Create one'; font-size: 9px; color: var(--accent); }
+
+  .es-skeleton { background: var(--surface); padding: 12px; height: 100%; display: flex; flex-direction: column; gap: 4px; justify-content: center; }
+  .es-skeleton div { height: 8px; background: var(--surface-alt); border-radius: 3px; animation: shimmer 1.5s ease-in-out infinite; }
+  .es-skeleton div:nth-child(1) { width: 70%; }
+  .es-skeleton div:nth-child(2) { width: 40%; }
+  .es-skeleton div:nth-child(3) { width: 55%; }
+  @keyframes shimmer { 0%, 100% { opacity: 0.7; } 50% { opacity: 0.4; } }
+
+  /* Density previews */
+  .dn-comfortable { background: var(--surface); padding: 8px; height: 100%; }
+  .dn-comfortable div { height: 22px; background: var(--surface-alt); border-radius: 3px; margin-bottom: 6px; padding: 0 8px; display: flex; align-items: center; }
+  .dn-comfortable div::before { content: ''; width: 6px; height: 6px; background: var(--border-strong); border-radius: 50%; margin-right: 8px; }
+  .dn-comfortable div::after { content: ''; flex: 1; height: 4px; background: var(--border-strong); border-radius: 2px; }
+  .dn-compact { background: var(--surface); padding: 6px; height: 100%; }
+  .dn-compact div { height: 14px; background: var(--surface-alt); border-radius: 2px; margin-bottom: 3px; padding: 0 6px; display: flex; align-items: center; }
+  .dn-compact div::before { content: ''; width: 4px; height: 4px; background: var(--border-strong); border-radius: 50%; margin-right: 6px; }
+  .dn-compact div::after { content: ''; flex: 1; height: 3px; background: var(--border-strong); border-radius: 1px; }
+
+  /* Button style previews */
+  .bs-rounded { background: var(--surface); padding: 14px; height: 100%; display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; }
+  .bs-rounded::before { content: 'Primary action'; background: var(--accent); color: white; font-size: 11px; padding: 6px 14px; border-radius: 6px; font-weight: 500; }
+  .bs-rounded::after { content: 'Secondary'; background: white; color: var(--text); border: 1px solid var(--border-strong); font-size: 11px; padding: 5px 14px; border-radius: 6px; font-weight: 500; }
+  .bs-pill { background: var(--surface); padding: 14px; height: 100%; display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; }
+  .bs-pill::before { content: 'Primary action'; background: var(--accent); color: white; font-size: 11px; padding: 6px 16px; border-radius: 999px; font-weight: 500; }
+  .bs-pill::after { content: 'Secondary'; background: white; color: var(--text); border: 1px solid var(--border-strong); font-size: 11px; padding: 5px 16px; border-radius: 999px; font-weight: 500; }
+  .bs-sharp { background: var(--surface); padding: 14px; height: 100%; display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; }
+  .bs-sharp::before { content: 'Primary action'; background: var(--text); color: var(--canvas); font-size: 11px; padding: 7px 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .bs-sharp::after { content: 'Secondary'; background: transparent; color: var(--text); border: 1px solid var(--text); font-size: 11px; padding: 6px 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .bs-text { background: var(--surface); padding: 14px; height: 100%; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; }
+  .bs-text::before { content: 'Primary action →'; color: var(--accent); font-size: 12px; font-weight: 600; }
+  .bs-text::after { content: 'Secondary'; color: var(--text-muted); font-size: 12px; font-weight: 500; }
+
+  /* Form layout previews */
+  .fl-stacked { background: var(--surface); padding: 12px; height: 100%; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+  .fl-stacked div:nth-child(odd) { font-size: 8px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .fl-stacked div:nth-child(even) { height: 18px; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 4px; }
+
+  .fl-inline { background: var(--surface); padding: 12px; height: 100%; display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+  .fl-inline div { display: grid; grid-template-columns: 60px 1fr; gap: 8px; align-items: center; }
+  .fl-inline div::before { content: ''; font-size: 9px; color: var(--text-muted); height: 5px; background: var(--border-strong); border-radius: 2px; }
+  .fl-inline div::after { content: ''; height: 18px; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 4px; }
+
+  .fl-floating { background: var(--surface); padding: 12px; height: 100%; display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+  .fl-floating div { position: relative; height: 22px; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 4px; }
+  .fl-floating div::before { content: 'Label'; position: absolute; top: -5px; left: 6px; background: var(--surface); padding: 0 4px; font-size: 8px; color: var(--text-muted); font-weight: 500; }
+
+  /* Loading state previews */
+  .ls-skeleton { background: var(--surface); padding: 10px; height: 100%; display: flex; flex-direction: column; gap: 4px; justify-content: center; }
+  .ls-skeleton div { height: 7px; background: var(--surface-alt); border-radius: 2px; animation: shimmer 1.5s ease-in-out infinite; }
+  .ls-skeleton div:nth-child(1) { width: 80%; }
+  .ls-skeleton div:nth-child(2) { width: 60%; }
+  .ls-skeleton div:nth-child(3) { width: 70%; }
+
+  .ls-spinner { background: var(--surface); padding: 10px; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .ls-spinner::after { content: ''; width: 24px; height: 24px; border: 2px solid var(--surface-alt); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .ls-progress { background: var(--surface); padding: 10px; height: 100%; display: flex; align-items: center; flex-direction: column; gap: 8px; justify-content: center; }
+  .ls-progress::before { content: 'Loading…'; font-size: 10px; color: var(--text-muted); }
+  .ls-progress::after { content: ''; width: 70%; height: 4px; background: var(--surface-alt); border-radius: 2px; position: relative; overflow: hidden; }
+  .ls-progress { position: relative; }
+  .ls-progress span { display: block; position: absolute; bottom: 12px; left: 15%; height: 4px; width: 70%; background: var(--surface-alt); border-radius: 2px; overflow: hidden; }
+  .ls-progress span::after { content: ''; position: absolute; inset: 0; background: var(--accent); width: 60%; border-radius: 2px; animation: progress 1.6s ease-in-out infinite; }
+  @keyframes progress { 0% { width: 10%; } 100% { width: 90%; } }
+
+  .ls-overlay { background: var(--surface); padding: 10px; height: 100%; position: relative; display: flex; flex-direction: column; gap: 4px; justify-content: center; }
+  .ls-overlay div { height: 6px; background: var(--surface-alt); border-radius: 2px; }
+  .ls-overlay div:nth-child(1) { width: 70%; }
+  .ls-overlay div:nth-child(2) { width: 50%; }
+  .ls-overlay::before { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.7); }
+  .ls-overlay::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 16px; height: 16px; border: 2px solid var(--surface-alt); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+  /* Notification previews */
+  .nf-toast { background: var(--surface-alt); padding: 12px; height: 100%; position: relative; }
+  .nf-toast::after { content: 'Saved successfully'; position: absolute; bottom: 8px; right: 8px; background: var(--text); color: var(--canvas); font-size: 10px; padding: 6px 10px; border-radius: 6px; box-shadow: var(--shadow-md); }
+  .nf-banner { background: var(--surface); height: 100%; display: flex; flex-direction: column; }
+  .nf-banner::before { content: '⚠ Update available'; padding: 6px 10px; background: #FFF4D6; border-bottom: 1px solid #F0DE9F; color: #6B5012; font-size: 10px; font-weight: 500; }
+  .nf-banner::after { content: ''; flex: 1; }
+  .nf-inline { background: var(--surface); padding: 10px; height: 100%; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+  .nf-inline::before { content: 'Email'; font-size: 9px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .nf-inline div { height: 18px; background: var(--surface-alt); border: 1px solid #C73E3E; border-radius: 4px; }
+  .nf-inline::after { content: '✗ Invalid email format'; font-size: 9px; color: #C73E3E; }
+
+  .nf-modal { background: var(--surface-alt); padding: 10px; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .nf-modal::after { content: '✓ Done'; padding: 8px 14px; background: var(--surface); border-radius: 8px; box-shadow: var(--shadow-md); font-size: 10px; font-weight: 600; color: #00A86B; }
+
+  /* ============ Free text ============ */
+  .free-text {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+    resize: vertical;
+    min-height: 90px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .free-text:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .text-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--text);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .text-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  /* ============ Mode tiles ============ */
+  .mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .mode-tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; cursor: pointer; transition: all 150ms ease; }
+  .mode-tile:hover { border-color: var(--border-strong); }
+  .mode-tile.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .mode-preview-pair { display: grid; gap: 6px; margin-bottom: 12px; height: 70px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .mode-light, .mode-dark { padding: 8px 10px; }
+  .mode-light { background: #FAFAF7; }
+  .mode-dark { background: #141413; }
+  .mode-light h6, .mode-dark h6 { margin: 0 0 2px; font-size: 10px; font-weight: 600; }
+  .mode-light h6 { color: #1A1916; }
+  .mode-dark h6 { color: #EDEBE4; }
+  .mode-light p, .mode-dark p { margin: 0; font-size: 8px; line-height: 1.4; }
+  .mode-light p { color: #6B6961; }
+  .mode-dark p { color: #A39F94; }
+
+  /* ============ Action bar ============ */
+  .action-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: color-mix(in srgb, var(--canvas) 92%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    padding: 14px 24px;
+    z-index: 100;
+  }
+  .action-bar-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; gap: 12px; justify-content: space-between; align-items: center;
+  }
+  .action-status { font-size: 12px; color: var(--text-subtle); }
+  .action-status strong { color: var(--text); font-weight: 600; }
+  .btn {
+    height: 40px; padding: 0 18px;
+    font: inherit; font-weight: 500; font-size: 14px;
+    border-radius: 8px; border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 120ms ease;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #245A95; }
+  .btn-ghost { background: transparent; color: var(--text-muted); }
+  .btn-ghost:hover { background: var(--surface-alt); color: var(--text); }
+  .btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
+  .btn-secondary:hover { background: var(--surface-alt); }
+
+  /* ============ Modal (export) ============ */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(20, 20, 19, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 760px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: auto;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+  }
+  .modal h2 { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 400; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .modal p.modal-help { color: var(--text-muted); font-size: 14px; margin: 0 0 20px; line-height: 1.55; }
+  .modal pre {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    max-height: 360px;
+    overflow: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .modal-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+  /* ============ Locked rules note ============ */
+  .locked-note {
+    background: var(--surface-alt);
+    border-left: 3px solid var(--accent);
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin-top: 18px;
+  }
+  .locked-note strong { color: var(--text); font-weight: 600; }
+
+  /* ============ Library step ============ */
+  .library-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .library-layout { grid-template-columns: 1fr; }
+  }
+
+  .library-toolbar {
+    display: flex; gap: 12px; align-items: center;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .library-search {
+    flex: 1; min-width: 180px;
+    height: 36px; padding: 0 12px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    font: inherit; font-size: 13px;
+  }
+  .library-search:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .library-add-btn {
+    height: 36px; padding: 0 14px;
+    background: var(--accent); color: white;
+    border: 0; border-radius: 8px;
+    font: inherit; font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .library-add-btn:hover { background: #245A95; }
+
+  .library-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .library-empty {
+    background: var(--surface);
+    border: 1px dashed var(--border-strong);
+    border-radius: 14px;
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .library-empty strong { display: block; color: var(--text); font-size: 15px; margin-bottom: 6px; }
+
+  .library-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 150ms ease;
+    position: relative;
+  }
+  .library-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .library-card.picked {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .library-card.picked::after {
+    content: '✓'; position: absolute;
+    top: 8px; right: 8px;
+    width: 24px; height: 24px;
+    background: var(--accent); color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+  }
+  .library-thumb {
+    height: 100px;
+    background: var(--surface-alt);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-subtle);
+    font-size: 11px;
+  }
+  .library-thumb img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .library-meta { padding: 12px 14px; }
+  .library-name {
+    font-size: 13px; font-weight: 600;
+    margin: 0 0 4px;
+    color: var(--text);
+  }
+  .library-source {
+    font-size: 10px; color: var(--text-subtle);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+  .library-tags {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    margin-top: 6px;
+  }
+  .library-tags span {
+    font-size: 10px;
+    background: var(--surface-alt);
+    color: var(--text-muted);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .library-selected-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    position: sticky; top: 100px;
+  }
+  .library-selected-title {
+    font-size: 12px; font-weight: 600;
+    color: var(--text-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .library-selected-list {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .library-selected-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    background: var(--surface-alt);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text);
+  }
+  .library-selected-item button {
+    background: transparent; border: 0; cursor: pointer;
+    color: var(--text-subtle); font-size: 14px; padding: 0;
+    margin-left: auto; line-height: 1;
+  }
+  .library-selected-item button:hover { color: #C73E3E; }
+  .library-selected-empty {
+    color: var(--text-subtle); font-size: 12px;
+    font-style: italic;
+    padding: 12px 0;
+  }
+
+  /* ============ Add component drawer ============ */
+  .drawer-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(20, 20, 19, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 150;
+    display: none;
+  }
+  .drawer-backdrop.open { display: block; }
+  .drawer {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 100%; max-width: 600px;
+    background: var(--canvas);
+    border-left: 1px solid var(--border);
+    box-shadow: -16px 0 48px rgba(0, 0, 0, 0.12);
+    z-index: 160;
+    transform: translateX(100%);
+    transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+    overflow-y: auto;
+    display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .drawer-header h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 24px; font-weight: 400;
+    margin: 0; letter-spacing: -0.01em;
+  }
+  .drawer-close {
+    background: var(--surface); border: 1px solid var(--border);
+    width: 32px; height: 32px; border-radius: 50%;
+    cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .drawer-body {
+    padding: 24px 28px 100px;
+    flex: 1;
+  }
+  .drawer-footer {
+    position: sticky; bottom: 0;
+    background: color-mix(in srgb, var(--canvas) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--border);
+    padding: 16px 28px;
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+  .form-field { margin-bottom: 18px; }
+  .form-field label {
+    display: block;
+    font-size: 11px; font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .form-field label .optional {
+    color: var(--text-subtle);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: 6px;
+  }
+  .form-field .helper {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .form-field input[type="text"],
+  .form-field input[type="url"] {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font: inherit; font-size: 14px;
+    color: var(--text);
+  }
+  .form-field input:focus,
+  .form-field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .form-field textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font: inherit; font-size: 14px;
+    color: var(--text);
+    resize: vertical;
+    min-height: 70px;
+  }
+  .form-field textarea.code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    min-height: 200px;
+    background: var(--surface-alt);
+  }
+
+  .tag-input {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 8px;
+    min-height: 42px;
+    align-items: center;
+  }
+  .tag-input .chip {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .tag-input .chip button {
+    background: transparent; border: 0;
+    color: var(--accent); cursor: pointer;
+    font-size: 14px; line-height: 1; padding: 0;
+  }
+  .tag-input input {
+    flex: 1; border: 0; outline: 0;
+    background: transparent;
+    font: inherit; font-size: 13px;
+    color: var(--text);
+  }
+
+  /* helpers */
+  .hint-row { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text-subtle); margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="dot"></span>
+      Design System Wizard
+    </div>
+    <div class="progress-meter">
+      <span>Step <strong id="current-step">1</strong> of 13</span>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 7.7%"></div></div>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ============ Step rail ============ -->
+  <aside class="step-rail">
+    <a class="step-link active" data-step="1" data-target="step-project"><span class="num">01</span>Project</a>
+    <a class="step-link" data-step="2" data-target="step-vibe"><span class="num">02</span>Vibe</a>
+    <a class="step-link" data-step="3" data-target="step-inspiration"><span class="num">03</span>Inspiration</a>
+    <a class="step-link" data-step="4" data-target="step-feeling"><span class="num">04</span>Feeling</a>
+    <a class="step-link" data-step="5" data-target="step-colour"><span class="num">05</span>Colour</a>
+    <a class="step-link" data-step="6" data-target="step-typography"><span class="num">06</span>Typography</a>
+    <a class="step-link" data-step="7" data-target="step-mode"><span class="num">07</span>Mode</a>
+    <a class="step-link" data-step="8" data-target="step-shape"><span class="num">08</span>Shape &amp; feel</a>
+    <a class="step-link" data-step="9" data-target="step-navigation"><span class="num">09</span>Navigation</a>
+    <a class="step-link" data-step="10" data-target="step-components"><span class="num">10</span>Components</a>
+    <a class="step-link" data-step="11" data-target="step-rules"><span class="num">11</span>Negotiable rules</a>
+    <a class="step-link" data-step="12" data-target="step-library"><span class="num">12</span>Library</a>
+    <a class="step-link" data-step="13" data-target="step-admin"><span class="num">13</span>Admin</a>
+  </aside>
+
+  <!-- ============ Content ============ -->
+  <main>
+
+    <!-- ===== STEP 1: Project ===== -->
+    <section class="step-section" id="step-project">
+      <div class="step-header">
+        <div class="step-eyebrow">Step 1 of 12 · Project</div>
+        <h1 class="step-title">What are you building?</h1>
+        <p class="step-help">A sentence or two. Plus the platform — that quietly changes density, navigation, and motion defaults underneath.</p>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Project name</h3>
+        <input type="text" class="text-input" id="project-name" placeholder="e.g. Meeting Memory, ClientFlow, Habits" />
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">What is it?</h3>
+        <p class="substep-help">A short description. The audience matters more than the feature list.</p>
+        <textarea class="free-text" id="project-description" placeholder="A meditation app for busy parents — short sessions, gentle tone, audio-first."></textarea>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Platform</h3>
+        <div class="choice-grid tight" data-single-select="platform">
+          <div class="choice-card selected" data-value="web"><div class="choice-meta"><h3 class="choice-name">Web</h3><p class="choice-why">SaaS, dashboard, marketing site. Mouse + keyboard primary.</p></div></div>
+          <div class="choice-card" data-value="ios"><div class="choice-meta"><h3 class="choice-name">iOS</h3><p class="choice-why">Native iPhone / iPad. SF Pro, 44pt tap targets, haptics.</p></div></div>
+          <div class="choice-card" data-value="android"><div class="choice-meta"><h3 class="choice-name">Android</h3><p class="choice-why">Material 3 tokens, 48dp tap targets.</p></div></div>
+          <div class="choice-card" data-value="desktop"><div class="choice-meta"><h3 class="choice-name">Desktop app</h3><p class="choice-why">Electron / Tauri / native. Denser, keyboard-first.</p></div></div>
+          <div class="choice-card" data-value="cross-web-mobile"><div class="choice-meta"><h3 class="choice-name">Web + mobile</h3><p class="choice-why">Responsive web that works on phones — not native apps.</p></div></div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Audience (optional)</h3>
+        <p class="substep-help">Helps tune voice, density, and microcopy. Skip if not relevant.</p>
+        <input type="text" class="text-input" id="project-audience" placeholder="e.g. Solo consultants in legal services" />
+      </div>
+    </section>
+
+    <!-- ===== STEP 2: Vibe ===== -->
+    <section class="step-section" id="step-vibe">
+      <div class="step-header">
+        <div class="step-eyebrow">Step 2 of 12 · Vibe</div>
+        <h1 class="step-title">What should it feel like at first glance?</h1>
+        <p class="step-help">Real renderings. Pick whichever one feels right — you can fine-tune everything afterwards.</p>
+      </div>
+
+      <div class="choice-grid" data-single-select="vibe">
+        <div class="choice-card selected" data-value="quiet"><div class="choice-preview"><div class="vibe-quiet"><h4>A quiet system that scales.</h4><p>Calm canvas, refined sans, generous whitespace.</p><span>Get started</span></div></div><div class="choice-meta"><h3 class="choice-name">Quiet &amp; considered</h3><p class="choice-why">Soft minimal. Off-white canvas, refined sans, light shadows. The content speaks; the interface gets out of the way.</p></div></div>
+        <div class="choice-card" data-value="technical"><div class="choice-preview"><div class="vibe-technical"><h4>Built for builders.</h4><p>// near-black canvas, sharp grotesque sans</p><span>$ run</span></div></div><div class="choice-meta"><h3 class="choice-name">Modern technical</h3><p class="choice-why">Near-black canvas, sharp grotesque sans, high-contrast accent, mono accents. Reads as serious, fast, engineered.</p></div></div>
+        <div class="choice-card" data-value="editorial"><div class="choice-preview"><div class="vibe-editorial"><h4>Slow craft, considered.</h4><p>Earthy neutrals and a serif display set the tone.</p><span>Read on →</span></div></div><div class="choice-meta"><h3 class="choice-name">Warm editorial</h3><p class="choice-why">Earthy neutrals, serif display, generous whitespace, magazine-like rhythm. Slow, considered, premium.</p></div></div>
+        <div class="choice-card" data-value="bold"><div class="choice-preview"><div class="vibe-bold"><h4>No half-measures.</h4><p>High-contrast type, saturated accent, decisive blocks.</p><span>Let's go</span></div></div><div class="choice-meta"><h3 class="choice-name">Bold &amp; graphic</h3><p class="choice-why">Saturated accent, strong type contrast, decisive blocks, sharp corners. Confident, opinionated.</p></div></div>
+        <div class="choice-card" data-value="playful"><div class="choice-preview"><div class="vibe-playful"><h4>Hello, friend!</h4><p>Soft pastels, rounded shapes, expressive type.</p><span>Say hi</span></div></div><div class="choice-meta"><h3 class="choice-name">Playful &amp; friendly</h3><p class="choice-why">Soft pastels, rounded shapes, expressive type, bouncy motion (the "no bounce" rule relaxes here). Approachable.</p></div></div>
+        <div class="choice-card" data-value="luxurious"><div class="choice-preview"><div class="vibe-luxe"><h4>A studied restraint.</h4><p>Deep neutrals, restrained accent, fine type.</p><span>Explore</span></div></div><div class="choice-meta"><h3 class="choice-name">Luxurious &amp; refined</h3><p class="choice-why">Deep neutrals, restrained accent (often metallic), fine type, slow motion. Reads as expensive.</p></div></div>
+      </div>
+    </section>
+
+    <!-- ===== STEP 3: Inspiration ===== -->
+    <section class="step-section" id="step-inspiration">
+      <div class="step-header">
+        <div class="step-eyebrow">Step 3 of 12 · Inspiration</div>
+        <h1 class="step-title">Show what looks right.</h1>
+        <p class="step-help">Upload as many screenshots, photos, or palette swatches as you want. URLs of sites you love, magazine covers, packaging, anything. The more you upload, the better the generator can match what you're actually going for.</p>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Visual references</h3>
+        <p class="substep-help">Screenshots of apps, websites, magazine spreads, photography — anything with a look you like. Multiple files welcome.</p>
+        <div class="upload-grid" id="inspiration-uploads">
+          <label class="upload-slot">
+            <input type="file" accept="image/*" data-category="inspiration" />
+            <button class="upload-remove" type="button">×</button>
+            <div class="upload-icon">+</div>
+            <div class="upload-text">Drop or click to upload</div>
+            <div class="upload-hint">PNG, JPG, screenshot</div>
+          </label>
+        </div>
+        <button class="upload-add-more" type="button" onclick="addUploadSlot('inspiration')">+ Add another</button>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">URLs (optional)</h3>
+        <p class="substep-help">One per line. Sites whose look you'd want to be in the same neighbourhood as.</p>
+        <textarea class="free-text" id="inspiration-urls" placeholder="https://linear.app
+https://kinfolk.com"></textarea>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Colour swatches (optional)</h3>
+        <p class="substep-help">Drop in a palette image, a Pantone reference, anything with colours you want pulled from. Or paste hex codes below.</p>
+        <div class="upload-grid" id="swatch-uploads">
+          <label class="upload-slot">
+            <input type="file" accept="image/*" data-category="swatches" />
+            <button class="upload-remove" type="button">×</button>
+            <div class="upload-icon">🎨</div>
+            <div class="upload-text">Upload palette</div>
+            <div class="upload-hint">Image of swatches</div>
+          </label>
+        </div>
+        <textarea class="free-text" id="hex-paste" placeholder="#2B6CB0, #4A5D5C, #C9A961
+or one per line" style="margin-top: 12px;"></textarea>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Font references (optional)</h3>
+        <p class="substep-help">A picture of type you like — a book cover, a magazine spread, a screenshot of a site whose font you can't name. The generator will identify and match.</p>
+        <div class="upload-grid" id="font-uploads">
+          <label class="upload-slot">
+            <input type="file" accept="image/*" data-category="fonts" />
+            <button class="upload-remove" type="button">×</button>
+            <div class="upload-icon">Aa</div>
+            <div class="upload-text">Upload font reference</div>
+            <div class="upload-hint">Photo or screenshot</div>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== STEP 4: Feeling ===== -->
+    <section class="step-section" id="step-feeling">
+      <div class="step-header">
+        <div class="step-eyebrow">Step 4 of 12 · Feeling</div>
+        <h1 class="step-title">Pick up to three words for the feeling.</h1>
+        <p class="step-help">Tunes voice, motion personality, and the personality of small details. One word is enough.</p>
+      </div>
+
+      <div class="tag-cloud" data-multi-select="feeling" data-max="3">
+        <div class="tag selected" data-value="calm">calm</div>
+        <div class="tag selected" data-value="trustworthy">trustworthy</div>
+        <div class="tag" data-value="bold">bold</div>
+        <div class="tag" data-value="playful">playful</div>
+        <div class="tag" data-value="serious">serious</div>
+        <div class="tag" data-value="luxurious">luxurious</div>
+        <div class="tag" data-value="technical">technical</div>
+        <div class="tag" data-value="friendly">friendly</div>
+        <div class="tag" data-value="energetic">energetic</div>
+        <div class="tag" data-value="contemplative">contemplative</div>
+        <div class="tag" data-value="sharp">sharp</div>
+        <div class="tag selected" data-value="soft">soft</div>
+        <div class="tag" data-value="warm">warm</div>
+        <div class="tag" data-value="precise">precise</div>
+        <div class="tag" data-value="organic">organic</div>
+      </div>
+    </section>
+
+    <!-- ===== STEP 5: Colour ===== -->
+    <section class="step-section" id="step-colour">
+      <div class="step-header">
+        <div class="step-eyebrow">Step 5 of 12 · Colour</div>
+        <h1 class="step-title">Pick the accent that defines this project.</h1>
+        <p class="step-help">One colour. Used for primary buttons, key data, active states. Everything else is derived. You can pick from the grid, type a hex, or upload a swatch image and the generator will pull from it.</p>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Pick from these</h3>
+        <div class="color-grid" data-single-select="accent">
+          <div class="color-tile" data-value="#2B6CB0" style="background: #2B6CB0;"><span>2B6CB0</span></div>
+          <div class="color-tile selected" data-value="#4A5D5C" style="background: #4A5D5C;"><span>4A5D5C</span></div>
+          <div class="color-tile" data-value="#8B4A2B" style="background: #8B4A2B;"><span>8B4A2B</span></div>
+          <div class="color-tile" data-value="#2D5F3F" style="background: #2D5F3F;"><span>2D5F3F</span></div>
+          <div class="color-tile" data-value="#7B5BD8" style="background: #7B5BD8;"><span>7B5BD8</span></div>
+          <div class="color-tile" data-value="#C9A961" style="background: #C9A961;"><span>C9A961</span></div>
+          <div class="color-tile" data-value="#C73E3E" style="background: #C73E3E;"><span>C73E3E</span></div>
+          <div class="color-tile" data-value="#1A1916" style="background: #1A1916;"><span>1A1916</span></div>
+          <div class="color-tile light" data-value="#FFE600" style="background: #FFE600;"><span>FFE600</span></div>
+          <div class="color-tile" data-value="#3A6F8F" style="background: #3A6F8F;"><span>3A6F8F</span></div>
+          <div class="color-tile" data-value="#6B5544" style="background: #6B5544;"><span>6B5544</span></div>
+          <div class="color-tile" data-value="#00A86B" style="background: #00A86B;"><span>00A86B</span></div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Or enter a custom hex</h3>
+        <div class="custom-color-row">
+          <label>Custom:</label>
+          <input type="text" class="custom-color-input" id="custom-hex" placeholder="#A1B2C3" />
+          <button class="btn btn-ghost" type="button" style="height: 32px; padding: 0 12px; font-size: 12px;">Apply</button>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Secondary accent (optional)</h3>
+        <p class="substep-help">Most projects don't need one. If yours has a clear second category (e.g. completion states, premium tier, an alternate context), pick it here.</p>
+        <input type="text" class="text-input" id="secondary-accent" placeholder="#XXXXXX or skip" />
+      </div>
+    </section>
+
+    <!-- ===== STEP 6: Typography ===== -->
+    <section class="step-section" id="step-typography">
+      <div class="step-header">
+        <div class="step-eyebrow">Step 6 of 12 · Typography</div>
+        <h1 class="step-title">How should the type feel?</h1>
+        <p class="step-help">You don't need to name fonts — pick a personality and the generator picks the actual fonts. Or upload a font reference image in step 3 and it'll match.</p>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Display type personality</h3>
+        <p class="substep-help">Used for headlines, hero sections, page titles.</p>
+        <div class="choice-grid" data-single-select="display-type">
+          <div class="choice-card selected" data-value="elegant-serif">
+            <div class="choice-preview"><div class="font-preview" style="padding: 24px; height: 100%;"><div style="font-family: 'Fraunces', serif; font-size: 30px; font-weight: 400; line-height: 1.05; letter-spacing: -0.01em;">Quiet weight,<br/>real authority.</div></div></div>
+            <div class="choice-meta"><h3 class="choice-name">Elegant serif</h3><p class="choice-why">Fraunces, Tiempos, Recoleta. Editorial and considered. Best for premium, contemplative products.</p></div>
+          </div>
+          <div class="choice-card" data-value="classic-serif">
+            <div class="choice-preview"><div class="font-preview" style="padding: 24px; height: 100%;"><div style="font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 500; line-height: 1; font-style: italic;">Made to be<br/>read slowly.</div></div></div>
+            <div class="choice-meta"><h3 class="choice-name">Classic serif</h3><p class="choice-why">Playfair, GT Sectra, Domaine. Magazine-like, decorative. Best for content, fashion, lifestyle.</p></div>
+          </div>
+          <div class="choice-card" data-value="grotesque-sans">
+            <div class="choice-preview"><div class="font-preview" style="padding: 24px; height: 100%;"><div style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; line-height: 1.05; letter-spacing: -0.02em;">Cleanly<br/>built.</div></div></div>
+            <div class="choice-meta"><h3 class="choice-name">Grotesque sans</h3><p class="choice-why">Space Grotesk, Söhne, Neue Haas. Sharp, technical, modern. Best for developer tools, dashboards.</p></div>
+          </div>
+          <div class="choice-card" data-value="humanist-sans">
+            <div class="choice-preview"><div class="font-preview" style="padding: 24px; height: 100%;"><div style="font-family: 'Manrope', sans-serif; font-size: 28px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em;">Friendly<br/>and clear.</div></div></div>
+            <div class="choice-meta"><h3 class="choice-name">Humanist sans</h3><p class="choice-why">Manrope, General Sans, Plus Jakarta. Warm, approachable. Best for consumer apps, social products.</p></div>
+          </div>
+          <div class="choice-card" data-value="display-impact">
+            <div class="choice-preview"><div class="font-preview" style="padding: 24px; height: 100%;"><div style="font-family: 'Manrope', sans-serif; font-size: 30px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; text-transform: uppercase;">DECISIVE<br/>WORK.</div></div></div>
+            <div class="choice-meta"><h3 class="choice-name">Display impact</h3><p class="choice-why">Heavy weight, tight tracking, often uppercase. Best for agencies, brands with strong personality.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Body type personality</h3>
+        <p class="substep-help">Used for paragraphs, captions, and most UI text.</p>
+        <div class="choice-grid" data-single-select="body-type">
+          <div class="choice-card selected" data-value="refined-sans">
+            <div class="choice-preview short"><div style="padding: 14px 18px; height: 100%; display: flex; align-items: center;"><div style="font-family: 'Inter Tight', sans-serif; font-size: 13px; line-height: 1.55;">A refined sans for body copy. Tight tracking, clear hierarchy, never generic.</div></div></div>
+            <div class="choice-meta"><h3 class="choice-name">Refined sans</h3><p class="choice-why">Inter Tight, Söhne, Neue Haas Grotesk. Most flexible, works almost anywhere.</p></div>
+          </div>
+          <div class="choice-card" data-value="warm-sans">
+            <div class="choice-preview short"><div style="padding: 14px 18px; height: 100%; display: flex; align-items: center;"><div style="font-family: 'Manrope', sans-serif; font-size: 13px; line-height: 1.55;">A warmer sans with humanist character. Easier on the eyes for long reading.</div></div></div>
+            <div class="choice-meta"><h3 class="choice-name">Warm sans</h3><p class="choice-why">Manrope, General Sans. Friendlier feel without sacrificing precision.</p></div>
+          </div>
+          <div class="choice-card" data-value="text-serif">
+            <div class="choice-preview short"><div style="padding: 14px 18px; height: 100%; display: flex; align-items: center;"><div style="font-family: 'Fraunces', serif; font-size: 14px; line-height: 1.6;">A text serif when reading is the experience. Long-form, considered, classic.</div></div></div>
+            <div class="choice-meta"><h3 class="choice-name">Text serif</h3><p class="choice-why">Fraunces, Source Serif, Tiempos Text. Best for long-form content products.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== STEP 7: Mode ===== -->
+    <section class="step-section" id="step-mode">
+      <div class="step-header">
+        <div class="step-eyebrow">Step 7 of 12 · Mode</div>
+        <h1 class="step-title">Light, dark, or both?</h1>
+        <p class="step-help">If both, the system commits to making each equally polished from day one — no retrofitting.</p>
+      </div>
+      <div class="mode-grid" data-single-select="mode">
+        <div class="mode-tile" data-value="light"><div class="mode-preview-pair" style="grid-template-columns: 1fr;"><div class="mode-light"><h6>Light only</h6><p>One canvas to design and maintain.</p></div></div><strong style="font-size: 13px;">Light only</strong><p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0;">Off-white canvas, no toggle, no dark mode work.</p></div>
+        <div class="mode-tile" data-value="dark"><div class="mode-preview-pair" style="grid-template-columns: 1fr;"><div class="mode-dark"><h6>Dark only</h6><p>One canvas, deeper personality.</p></div></div><strong style="font-size: 13px;">Dark only</strong><p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0;">Tinted near-black canvas. Common for dev tools, creative apps.</p></div>
+        <div class="mode-tile selected" data-value="dual"><div class="mode-preview-pair" style="grid-template-columns: 1fr 1fr;"><div class="mode-light"><h6>Light</h6><p>Off-white.</p></div><div class="mode-dark"><h6>Dark</h6><p>Near-black.</p></div></div><strong style="font-size: 13px;">Both — equally polished</strong><p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0;">Both modes designed together from day one.</p></div>
+        <div class="mode-tile" data-value="auto"><div class="mode-preview-pair" style="grid-template-columns: 1fr 1fr;"><div class="mode-light"><h6>Auto</h6><p>Follows OS.</p></div><div class="mode-dark"><h6>Auto</h6><p>Follows OS.</p></div></div><strong style="font-size: 13px;">Auto-switch with system</strong><p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0;">Both built; no explicit toggle, follows OS preference.</p></div>
+      </div>
+    </section>
+
+    <!-- ===== STEP 8: Shape & feel ===== -->
+    <section class="step-section" id="step-shape">
+      <div class="step-header">
+        <div class="step-eyebrow">Step 8 of 12 · Shape &amp; feel</div>
+        <h1 class="step-title">The texture of the system.</h1>
+        <p class="step-help">Buttons, corners, density. Small choices that compound into how the whole thing feels.</p>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Button shape</h3>
+        <div class="choice-grid tight" data-single-select="button-shape">
+          <div class="choice-card selected" data-value="rounded"><div class="choice-preview short"><div class="bs-rounded"></div></div><div class="choice-meta"><h3 class="choice-name">Rounded</h3><p class="choice-why">Soft 6–8px radius. Universal default.</p></div></div>
+          <div class="choice-card" data-value="pill"><div class="choice-preview short"><div class="bs-pill"></div></div><div class="choice-meta"><h3 class="choice-name">Pill</h3><p class="choice-why">Fully rounded ends. Friendlier, can feel toy-like in dense UIs.</p></div></div>
+          <div class="choice-card" data-value="sharp"><div class="choice-preview short"><div class="bs-sharp"></div></div><div class="choice-meta"><h3 class="choice-name">Sharp</h3><p class="choice-why">Zero radius, often uppercase. Decisive, editorial, brand-led.</p></div></div>
+          <div class="choice-card" data-value="text"><div class="choice-preview short"><div class="bs-text"></div></div><div class="choice-meta"><h3 class="choice-name">Text-link primary</h3><p class="choice-why">No buttons at all — arrows and text. Editorial, content-led products.</p></div></div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Density</h3>
+        <p class="substep-help">How tightly information packs together. Affects table rows, list items, navigation spacing.</p>
+        <div class="choice-grid tight" data-single-select="density">
+          <div class="choice-card selected" data-value="comfortable"><div class="choice-preview short"><div class="dn-comfortable"><div></div><div></div><div></div></div></div><div class="choice-meta"><h3 class="choice-name">Comfortable</h3><p class="choice-why">Relaxed rows. For consumer apps and most SaaS.</p></div></div>
+          <div class="choice-card" data-value="compact"><div class="choice-preview short"><div class="dn-compact"><div></div><div></div><div></div><div></div><div></div></div></div><div class="choice-meta"><h3 class="choice-name">Compact</h3><p class="choice-why">Tight rows. For data-heavy admin, dashboards, IDE-like tools.</p></div></div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Shadow philosophy</h3>
+        <p class="substep-help">How the system handles depth.</p>
+        <div class="choice-grid tight" data-single-select="shadow">
+          <div class="choice-card selected" data-value="soft"><div class="choice-preview short"><div class="shadow-preview" style="padding: 20px;"><div class="shadow-block shadow-soft"></div></div></div><div class="choice-meta"><h3 class="choice-name">Soft</h3><p class="choice-why">Light, neutral shadows. The default for most products.</p></div></div>
+          <div class="choice-card" data-value="warm"><div class="choice-preview short"><div class="shadow-preview" style="padding: 20px;"><div class="shadow-block shadow-warm"></div></div></div><div class="choice-meta"><h3 class="choice-name">Warm-tinted</h3><p class="choice-why">Brand-tinted shadows. For editorial, considered products.</p></div></div>
+          <div class="choice-card" data-value="sharp"><div class="choice-preview short"><div class="shadow-preview" style="padding: 20px;"><div class="shadow-block shadow-sharp"></div></div></div><div class="choice-meta"><h3 class="choice-name">Hard-edged</h3><p class="choice-why">Solid offset shadows, no blur. For bold, graphic, brutalist styles.</p></div></div>
+          <div class="choice-card" data-value="none"><div class="choice-preview short"><div class="shadow-preview" style="padding: 20px;"><div class="shadow-block shadow-none"></div></div></div><div class="choice-meta"><h3 class="choice-name">No shadows</h3><p class="choice-why">Borders only. Flatter, more editorial. For minimal systems.</p></div></div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Motion personality</h3>
+        <p class="substep-help">How transitions feel. Hover the previews to see them animate.</p>
+        <div class="choice-grid tight" data-single-select="motion">
+          <div class="choice-card selected" data-value="snappy"><div class="choice-preview short"><div class="motion-preview motion-snappy"><div class="motion-dot"></div></div></div><div class="choice-meta"><h3 class="choice-name">Snappy</h3><p class="choice-why">Fast, precise, ease-out. 120–180ms. Best for technical, productivity.</p></div></div>
+          <div class="choice-card" data-value="considered"><div class="choice-preview short"><div class="motion-preview motion-considered"><div class="motion-dot"></div></div></div><div class="choice-meta"><h3 class="choice-name">Considered</h3><p class="choice-why">Smooth, deliberate. 200–280ms. The default for most products.</p></div></div>
+          <div class="choice-card" data-value="bouncy"><div class="choice-preview short"><div class="motion-preview motion-bouncy"><div class="motion-dot"></div></div></div><div class="choice-meta"><h3 class="choice-name">Bouncy</h3><p class="choice-why">Springy, playful. Best for friendly products. (Off by default; turn on in step 11.)</p></div></div>
+          <div class="choice-card" data-value="luxe"><div class="choice-preview short"><div class="motion-preview motion-luxe"><div class="motion-dot"></div></div></div><div class="choice-meta"><h3 class="choice-name">Luxe</h3><p class="choice-why">Slow, fading. 320–480ms. Best for luxurious, contemplative products.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== STEP 9: Navigation ===== -->
+    <section class="step-section" id="step-navigation">
+      <div class="step-header">
+        <div class="step-eyebrow">Step 9 of 12 · Navigation</div>
+        <h1 class="step-title">How does the user move around?</h1>
+        <p class="step-help">Where the primary navigation lives, plus how secondary patterns behave.</p>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Primary navigation pattern</h3>
+        <div class="choice-grid" data-single-select="primary-nav">
+          <div class="choice-card selected" data-value="icon-rail"><div class="choice-preview short"><div class="menu-rail menu-preview"><div class="menu-rail-icons"><div></div><div></div><div></div><div></div></div><div class="menu-rail-content"><div></div><div></div></div></div></div><div class="choice-meta"><h3 class="choice-name">Icon rail (Supabase)</h3><p class="choice-why">Collapsed icons by default, expands on hover. For productivity tools with many sections.</p></div></div>
+          <div class="choice-card" data-value="sidebar"><div class="choice-preview short"><div class="menu-sidebar menu-preview"><div class="menu-sidebar-nav"><div></div><div></div><div></div></div><div class="menu-sidebar-content"><div></div><div></div></div></div></div><div class="choice-meta"><h3 class="choice-name">Always-expanded sidebar</h3><p class="choice-why">Visible labels at all times. For dashboards where users need to scan options.</p></div></div>
+          <div class="choice-card" data-value="top-bar"><div class="choice-preview short"><div class="menu-top menu-preview"><div class="menu-top-bar"><div></div><div></div><div></div></div><div class="menu-top-content"><div></div><div></div></div></div></div><div class="choice-meta"><h3 class="choice-name">Top bar</h3><p class="choice-why">Horizontal links across the top. For marketing sites and content products.</p></div></div>
+          <div class="choice-card" data-value="bottom-tabs"><div class="choice-preview short"><div class="menu-bottom menu-preview"><div class="menu-bottom-content"><div></div><div></div></div><div class="menu-bottom-bar"><div></div><div></div><div></div><div></div></div></div></div><div class="choice-meta"><h3 class="choice-name">Bottom tabs</h3><p class="choice-why">Mobile-first bottom navigation. For consumer apps with 3–5 main sections.</p></div></div>
+          <div class="choice-card" data-value="cmdk"><div class="choice-preview short"><div class="menu-cmd"><div class="menu-cmd-box"><div>⌘K</div><div></div><div></div><div></div></div></div></div><div class="choice-meta"><h3 class="choice-name">Command palette first</h3><p class="choice-why">⌘K is the primary nav. Minimal chrome. For power-user tools.</p></div></div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Tooltip behaviour</h3>
+        <p class="substep-help">How help text appears.</p>
+        <div class="choice-grid tight" data-single-select="tooltip">
+          <div class="choice-card selected" data-value="delayed"><div class="choice-preview short"><div class="tt-delayed"><span>hover, wait 400ms</span></div></div><div class="choice-meta"><h3 class="choice-name">Delayed hover</h3><p class="choice-why">Appears after ~400ms hover. For icon-only buttons.</p></div></div>
+          <div class="choice-card" data-value="instant"><div class="choice-preview short"><div class="tt-instant"></div></div><div class="choice-meta"><h3 class="choice-name">Instant hover</h3><p class="choice-why">Appears immediately. Use sparingly — feels noisy.</p></div></div>
+          <div class="choice-card" data-value="popover"><div class="choice-preview short"><div class="tt-popover"></div></div><div class="choice-meta"><h3 class="choice-name">Click-to-open popover</h3><p class="choice-why">Click to reveal. For longer help with formatting.</p></div></div>
+          <div class="choice-card" data-value="none"><div class="choice-preview short"><div class="tt-none"><span>no tooltips, all labels visible</span></div></div><div class="choice-meta"><h3 class="choice-name">None</h3><p class="choice-why">All controls have visible labels. No hidden info.</p></div></div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Mobile pattern (if web or cross-platform)</h3>
+        <p class="substep-help">How navigation transforms on small screens.</p>
+        <div class="choice-grid tight" data-single-select="mobile-nav">
+          <div class="choice-card selected" data-value="bottom-tabs-mobile"><div class="choice-meta"><h3 class="choice-name">Bottom tabs</h3><p class="choice-why">App-like, persistent, thumb-friendly. Best default.</p></div></div>
+          <div class="choice-card" data-value="hamburger"><div class="choice-meta"><h3 class="choice-name">Hamburger drawer</h3><p class="choice-why">Slide-out menu. Holds more items but hides them.</p></div></div>
+          <div class="choice-card" data-value="rail-collapses"><div class="choice-meta"><h3 class="choice-name">Rail collapses to drawer</h3><p class="choice-why">Desktop rail becomes a drawer on mobile.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== STEP 10: Components & Patterns ===== -->
+    <section class="step-section" id="step-components">
+      <div class="step-header">
+        <div class="step-eyebrow">Step 10 of 12 · Components</div>
+        <h1 class="step-title">How specific patterns should behave.</h1>
+        <p class="step-help">Forms, empty states, loading, notifications. Small but consequential — these are the moments that define how polished the product feels.</p>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Form layout</h3>
+        <p class="substep-help">How labels relate to fields.</p>
+        <div class="choice-grid tight" data-single-select="form-layout">
+          <div class="choice-card selected" data-value="stacked"><div class="choice-preview short"><div class="fl-stacked"><div>Email</div><div></div><div>Password</div><div></div></div></div><div class="choice-meta"><h3 class="choice-name">Stacked</h3><p class="choice-why">Label above field. Default — works everywhere.</p></div></div>
+          <div class="choice-card" data-value="inline"><div class="choice-preview short"><div class="fl-inline"><div></div><div></div><div></div></div></div><div class="choice-meta"><h3 class="choice-name">Inline</h3><p class="choice-why">Label beside field. For settings pages, denser layouts.</p></div></div>
+          <div class="choice-card" data-value="floating"><div class="choice-preview short"><div class="fl-floating"><div></div><div></div></div></div><div class="choice-meta"><h3 class="choice-name">Floating label</h3><p class="choice-why">Label sits on the border. Compact but trickier accessibility.</p></div></div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Empty state style</h3>
+        <p class="substep-help">What "nothing here yet" looks like.</p>
+        <div class="choice-grid tight" data-single-select="empty-state">
+          <div class="choice-card selected" data-value="text-cta"><div class="choice-preview short"><div class="es-text"></div></div><div class="choice-meta"><h3 class="choice-name">Text + CTA</h3><p class="choice-why">A line of text and a clear next action. Most useful, least decorative.</p></div></div>
+          <div class="choice-card" data-value="illustrated"><div class="choice-preview short"><div class="es-illustrated"><span>No items yet</span></div></div><div class="choice-meta"><h3 class="choice-name">Illustrated</h3><p class="choice-why">Subtle icon or illustration. Adds personality but takes work.</p></div></div>
+          <div class="choice-card" data-value="skeleton"><div class="choice-preview short"><div class="es-skeleton"><div></div><div></div><div></div></div></div><div class="choice-meta"><h3 class="choice-name">Skeleton hint</h3><p class="choice-why">Show what would be there. Good when filling is the obvious next step.</p></div></div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Loading style</h3>
+        <p class="substep-help">How "wait" is communicated.</p>
+        <div class="choice-grid tight" data-single-select="loading">
+          <div class="choice-card selected" data-value="skeleton"><div class="choice-preview short"><div class="ls-skeleton"><div></div><div></div><div></div></div></div><div class="choice-meta"><h3 class="choice-name">Skeleton</h3><p class="choice-why">Show the shape of what's coming. Best on first load and content fetches.</p></div></div>
+          <div class="choice-card" data-value="spinner"><div class="choice-preview short"><div class="ls-spinner"></div></div><div class="choice-meta"><h3 class="choice-name">Spinner</h3><p class="choice-why">Indeterminate progress. For unknown durations &lt; 5 seconds.</p></div></div>
+          <div class="choice-card" data-value="progress"><div class="choice-preview short"><div class="ls-progress"><span></span></div></div><div class="choice-meta"><h3 class="choice-name">Progress bar</h3><p class="choice-why">For known durations or step-based processes.</p></div></div>
+          <div class="choice-card" data-value="overlay"><div class="choice-preview short"><div class="ls-overlay"><div></div><div></div></div></div><div class="choice-meta"><h3 class="choice-name">Inline overlay</h3><p class="choice-why">Spinner over the section being updated. For partial refresh.</p></div></div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Notification style</h3>
+        <p class="substep-help">How feedback for actions is shown.</p>
+        <div class="choice-grid tight" data-single-select="notifications">
+          <div class="choice-card selected" data-value="toast"><div class="choice-preview short"><div class="nf-toast"></div></div><div class="choice-meta"><h3 class="choice-name">Toasts</h3><p class="choice-why">Bottom-right, auto-dismiss. The default for action confirmations.</p></div></div>
+          <div class="choice-card" data-value="banner"><div class="choice-preview short"><div class="nf-banner"></div></div><div class="choice-meta"><h3 class="choice-name">Banners</h3><p class="choice-why">Persistent strip at top. For system-wide messages.</p></div></div>
+          <div class="choice-card" data-value="inline"><div class="choice-preview short"><div class="nf-inline"><div></div></div></div><div class="choice-meta"><h3 class="choice-name">Inline only</h3><p class="choice-why">Errors and confirmations near the source. Most direct.</p></div></div>
+          <div class="choice-card" data-value="modal"><div class="choice-preview short"><div class="nf-modal"></div></div><div class="choice-meta"><h3 class="choice-name">Modal confirmations</h3><p class="choice-why">Block until acknowledged. Reserve for destructive or important.</p></div></div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Hard limits to encode</h3>
+        <p class="substep-help">Things you specifically don't want, beyond the standard rules. Free text — be as specific as you like.</p>
+        <textarea class="free-text" id="hard-limits" placeholder="No huge stock photos of people in offices.
+No marketing-speak in the product UI.
+No pop-up newsletter modal."></textarea>
+      </div>
+    </section>
+
+    <!-- ===== STEP 11: Negotiable rules ===== -->
+    <section class="step-section" id="step-rules">
+      <div class="step-header">
+        <div class="step-eyebrow">Step 11 of 12 · Negotiable rules</div>
+        <h1 class="step-title">Some things are usually banned. Want any?</h1>
+        <p class="step-help">Each is normally flagged as "AI slop" or a bad habit. Off by default. Toggle on if it's right for this project.</p>
+      </div>
+
+      <div class="toggle-list">
+        <div class="toggle-row"><div class="toggle-preview pp-glass"></div><div class="toggle-text"><div class="toggle-name">Glassmorphism</div><div class="toggle-why">Frosted-glass effects. Often a tell, but legitimate for floating navigation, sidebars, modals over content.</div></div><div class="toggle-switch on" data-rule="glassmorphism"></div></div>
+        <div class="toggle-row"><div class="toggle-preview pp-gradient-text">Title</div><div class="toggle-text"><div class="toggle-name">Gradient text</div><div class="toggle-why">Coloured gradients on type. Fine for marketing display, weak on UI metrics.</div></div><div class="toggle-switch" data-rule="gradient-text"></div></div>
+        <div class="toggle-row"><div class="toggle-preview pp-glow"></div><div class="toggle-text"><div class="toggle-name">Coloured glow</div><div class="toggle-why">Neon halos. Right for cyberpunk, gaming, music apps. Wrong otherwise.</div></div><div class="toggle-switch" data-rule="glow"></div></div>
+        <div class="toggle-row"><div class="toggle-preview pp-centered"></div><div class="toggle-text"><div class="toggle-name">Centred everything</div><div class="toggle-why">Centring as default. Works for landing pages, weak for product UI.</div></div><div class="toggle-switch" data-rule="centered"></div></div>
+        <div class="toggle-row"><div class="toggle-preview pp-bouncy"></div><div class="toggle-text"><div class="toggle-name">Bounce / elastic motion</div><div class="toggle-why">Springy easing. Right for friendly products, dated for serious ones.</div></div><div class="toggle-switch" data-rule="bouncy"></div></div>
+        <div class="toggle-row"><div class="toggle-preview pp-pure"><div class="pp-pure-l"></div><div class="pp-pure-d"></div></div><div class="toggle-text"><div class="toggle-name">Pure black / white</div><div class="toggle-why">#000 and #FFF as canvas. Usually feels harsh; some brands use them deliberately.</div></div><div class="toggle-switch" data-rule="pure-bw"></div></div>
+        <div class="toggle-row"><div class="toggle-preview pp-inter">Aa</div><div class="toggle-text"><div class="toggle-name">Inter as default body</div><div class="toggle-why">Inter is everywhere — readable but generic. Allow only if it genuinely fits.</div></div><div class="toggle-switch" data-rule="inter"></div></div>
+        <div class="toggle-row"><div class="toggle-preview pp-side-tab"></div><div class="toggle-text"><div class="toggle-name">Side-tab accent cards</div><div class="toggle-why">Coloured stripe down a card's side. The #1 AI tell — but occasionally intentional in dashboards.</div></div><div class="toggle-switch" data-rule="side-tab"></div></div>
+        <div class="toggle-row"><div class="toggle-preview pp-icon-tile"></div><div class="toggle-text"><div class="toggle-name">Icon tile above heading</div><div class="toggle-why">Icon-in-rounded-square stacked over heading. The universal AI feature-card template.</div></div><div class="toggle-switch" data-rule="icon-tile"></div></div>
+        <div class="toggle-row"><div class="toggle-preview pp-modal"></div><div class="toggle-text"><div class="toggle-name">Modal-heavy interactions</div><div class="toggle-why">Modals for non-destructive actions. Usually a sign of UX laziness.</div></div><div class="toggle-switch" data-rule="modals"></div></div>
+        <div class="toggle-row"><div class="toggle-preview pp-cardceptn"></div><div class="toggle-text"><div class="toggle-name">Nested cards</div><div class="toggle-why">Cards inside cards inside cards. <strong>This is a hard ban for you</strong> — not toggleable. Shown for completeness.</div></div><div class="toggle-switch" data-rule="nested-cards" style="opacity: 0.4; pointer-events: none;"></div></div>
+      </div>
+
+      <div class="locked-note">
+        <strong>Always-on rules.</strong> Cards-inside-cards banned. WCAG AA contrast. Body text 14px minimum. Animate transform/opacity only. Empty/loading/error states required for every component. If dual mode, both equally polished from day one.
+      </div>
+    </section>
+
+    <!-- ===== STEP 12: Library components ===== -->
+    <section class="step-section" id="step-library">
+      <div class="step-header">
+        <div class="step-eyebrow">Step 12 of 13 · Library</div>
+        <h1 class="step-title">Pick components from your library.</h1>
+        <p class="step-help">Your global component library — built up over time. Tap to pick the components relevant for this project. Only the picked ones appear in the output prompt, so Claude Desktop produces just the component-*.md files you actually need.</p>
+      </div>
+
+      <div class="library-toolbar">
+        <input type="text" class="library-search" id="library-search" placeholder="Search library by name or tag..." />
+        <button class="library-add-btn" type="button" onclick="openComponentDrawer()">+ Add component</button>
+      </div>
+
+      <div class="library-layout">
+        <div>
+          <div class="library-grid" id="library-grid">
+            <!-- Sample components — in the real app these come from IndexedDB -->
+            <div class="library-card" data-id="sample-1" onclick="togglePick(this, 'Audio waveform visualiser')">
+              <div class="library-thumb">📊 demo</div>
+              <div class="library-meta">
+                <div class="library-name">Audio waveform visualiser</div>
+                <div class="library-source">21st.dev</div>
+                <div class="library-tags"><span>audio</span><span>animation</span></div>
+              </div>
+            </div>
+            <div class="library-card" data-id="sample-2" onclick="togglePick(this, 'Card stack reveal')">
+              <div class="library-thumb">🎴 demo</div>
+              <div class="library-meta">
+                <div class="library-name">Card stack reveal</div>
+                <div class="library-source">magicui.design</div>
+                <div class="library-tags"><span>cards</span><span>animation</span></div>
+              </div>
+            </div>
+            <div class="library-card" data-id="sample-3" onclick="togglePick(this, 'Hopper scroll effect')">
+              <div class="library-thumb">↕ demo</div>
+              <div class="library-meta">
+                <div class="library-name">Hopper scroll effect</div>
+                <div class="library-source">aceternity.com</div>
+                <div class="library-tags"><span>scroll</span><span>hero</span></div>
+              </div>
+            </div>
+            <div class="library-card" data-id="sample-4" onclick="togglePick(this, 'Soft pulse listening indicator')">
+              <div class="library-thumb">⚪ demo</div>
+              <div class="library-meta">
+                <div class="library-name">Soft pulse listening indicator</div>
+                <div class="library-source">custom</div>
+                <div class="library-tags"><span>audio</span><span>indicator</span></div>
+              </div>
+            </div>
+            <div class="library-card" data-id="sample-5" onclick="togglePick(this, 'Animated counter')">
+              <div class="library-thumb">123 demo</div>
+              <div class="library-meta">
+                <div class="library-name">Animated counter</div>
+                <div class="library-source">21st.dev</div>
+                <div class="library-tags"><span>data</span><span>animation</span></div>
+              </div>
+            </div>
+            <div class="library-card" data-id="sample-6" onclick="togglePick(this, 'Magnetic cursor')">
+              <div class="library-thumb">⊕ demo</div>
+              <div class="library-meta">
+                <div class="library-name">Magnetic cursor</div>
+                <div class="library-source">aceternity.com</div>
+                <div class="library-tags"><span>cursor</span><span>interaction</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hint-row" style="margin-top: 16px;">
+            ▸ In the real app, this grid is populated from your IndexedDB library, persisted across all projects.
+          </div>
+        </div>
+
+        <aside class="library-selected-panel">
+          <div class="library-selected-title">Selected for this project</div>
+          <div class="library-selected-list" id="selected-list">
+            <div class="library-selected-empty">Nothing picked yet</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ===== Component drawer (overlay) ===== -->
+    <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeComponentDrawer()"></div>
+    <div class="drawer" id="component-drawer">
+      <div class="drawer-header">
+        <h2>Add a component</h2>
+        <button class="drawer-close" onclick="closeComponentDrawer()">×</button>
+      </div>
+      <div class="drawer-body">
+        <div class="form-field">
+          <label>Source URL <span class="optional">— optional, paste from 21st.dev, magicui, etc.</span></label>
+          <input type="url" id="cmp-url" placeholder="https://21st.dev/components/..." />
+          <div class="helper">If pasted, the form attempts to auto-fill name and screenshot.</div>
+        </div>
+        <div class="form-field">
+          <label>Name <span class="optional">— required</span></label>
+          <input type="text" id="cmp-name" placeholder="e.g. Magnetic cursor effect" />
+        </div>
+        <div class="form-field">
+          <label>Adapted name <span class="optional">— optional, auto-derived</span></label>
+          <input type="text" id="cmp-adapted" placeholder="e.g. cursor (kebab-case for filenames)" />
+          <div class="helper">Becomes <code>component-&lt;adapted-name&gt;.md</code>. Lowercase, hyphens only.</div>
+        </div>
+        <div class="form-field">
+          <label>Description <span class="optional">— optional</span></label>
+          <textarea id="cmp-description" placeholder="One or two lines: what it does, visual style."></textarea>
+        </div>
+        <div class="form-field">
+          <label>Code <span class="optional">— optional, paste full snippet</span></label>
+          <textarea id="cmp-code" class="code" placeholder="// paste the component code here&#10;// language auto-detected"></textarea>
+        </div>
+        <div class="form-field">
+          <label>Screenshots / videos <span class="optional">— optional, multiple allowed</span></label>
+          <div class="upload-grid">
+            <label class="upload-slot">
+              <input type="file" accept="image/*,video/*" />
+              <button class="upload-remove" type="button">×</button>
+              <div class="upload-icon">+</div>
+              <div class="upload-text">Drop screenshot or video</div>
+            </label>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Notes <span class="optional">— when to use, when not to</span></label>
+          <textarea id="cmp-notes" placeholder="Use during recording sessions. Don't use when audio is muted."></textarea>
+        </div>
+        <div class="form-field">
+          <label>Tags</label>
+          <div class="tag-input">
+            <span class="chip">audio<button>×</button></span>
+            <span class="chip">animation<button>×</button></span>
+            <input type="text" placeholder="Add tag and press Enter" />
+          </div>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button class="btn btn-ghost" type="button" onclick="closeComponentDrawer()">Cancel</button>
+        <button class="btn btn-primary" type="button" onclick="saveComponent()">Save to library</button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 13: Admin ===== -->
+    <section class="step-section" id="step-admin">
+      <div class="step-header">
+        <div class="step-eyebrow">Step 13 of 13 · Admin</div>
+        <h1 class="step-title">Does this product need an admin area?</h1>
+        <p class="step-help">If yes, the generator scaffolds the standard admin pattern — LLM config, prompt slug binding, user management, usage analytics, moderation. Routes at /admin with role-based access.</p>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Admin scope</h3>
+        <div class="choice-grid" data-single-select="admin">
+          <div class="choice-card selected" data-value="full"><div class="choice-meta"><h3 class="choice-name">Full admin</h3><p class="choice-why">All five standard sections: LLM config, prompt binding with versioning, users, usage, moderation. Most products you ship.</p></div></div>
+          <div class="choice-card" data-value="minimal"><div class="choice-meta"><h3 class="choice-name">Minimal — LLM config only</h3><p class="choice-why">Just the LLM config page. For personal tools, prototypes, single-user apps.</p></div></div>
+          <div class="choice-card" data-value="none"><div class="choice-meta"><h3 class="choice-name">No admin</h3><p class="choice-why">No admin scaffolding. Configuration via redeploy.</p></div></div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Optional admin sections</h3>
+        <p class="substep-help">Beyond the standard five. Pick what this project needs.</p>
+        <div class="tag-cloud" data-multi-select="admin-extras">
+          <div class="tag" data-value="feature-flags">Feature flags</div>
+          <div class="tag" data-value="branding">Branding overrides</div>
+          <div class="tag" data-value="audit-log">Audit log viewer</div>
+          <div class="tag" data-value="webhooks">Webhook config</div>
+          <div class="tag" data-value="api-keys">API key management</div>
+          <div class="tag" data-value="email">Email templates</div>
+          <div class="tag" data-value="jobs">Job monitor</div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <h3 class="substep-title">Anything else?</h3>
+        <p class="substep-help">Final catch-all. Anything specific about this project that doesn't fit elsewhere.</p>
+        <textarea class="free-text" id="anything-else" placeholder="Audience notes, brand constraints, accessibility needs, integrations…"></textarea>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ Action bar ============ -->
+<div class="action-bar">
+  <div class="action-bar-inner">
+    <div class="action-status">Step <strong id="action-step">1</strong> of 12</div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-secondary" type="button" onclick="saveDraft()">Save draft</button>
+      <button class="btn btn-primary" type="button" onclick="generatePack()">Generate pack →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Export modal ============ -->
+<div class="modal-backdrop" id="export-modal">
+  <div class="modal">
+    <h2>Your design pack is ready</h2>
+    <p class="modal-help">Copy the generation prompt below. Open Claude Desktop on your Max subscription, paste it in, and Claude will produce three files for you: <code>DESIGN.md</code>, <code>mood-board.html</code>, and <code>ADMIN-SCAFFOLDING.md</code> (if admin enabled). No API key needed — your subscription does the work.</p>
+    <pre id="export-content"></pre>
+    <div class="modal-actions">
+      <button class="btn btn-primary" type="button" onclick="copyExport()">Copy prompt</button>
+      <button class="btn btn-secondary" type="button" onclick="downloadJSON()">Download JSON only</button>
+      <button class="btn btn-ghost" type="button" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// State
+// ============================================================
+const state = {
+  project: { name: '', description: '', platform: 'web', audience: '' },
+  vibe: 'quiet',
+  inspiration: { urls: '', files: [], hexes: '', fonts: [], swatches: [] },
+  feeling: ['calm', 'trustworthy', 'soft'],
+  colour: { accent: '#4A5D5C', secondary: '' },
+  typography: { display: 'elegant-serif', body: 'refined-sans' },
+  mode: 'dual',
+  shape: { button: 'rounded', density: 'comfortable', shadow: 'soft', motion: 'considered' },
+  navigation: { primary: 'icon-rail', tooltip: 'delayed', mobile: 'bottom-tabs-mobile' },
+  components: { form: 'stacked', empty: 'text-cta', loading: 'skeleton', notification: 'toast' },
+  hardLimits: '',
+  rules: { glassmorphism: true, 'gradient-text': false, glow: false, centered: false, bouncy: false, 'pure-bw': false, inter: false, 'side-tab': false, 'icon-tile': false, modals: false },
+  admin: { scope: 'full', extras: [] },
+  anythingElse: '',
+  library: {
+    selected: []  // array of { name, source, code, screenshot, notes, tags }
+  }
+};
+
+// ============================================================
+// Library picker
+// ============================================================
+const SAMPLE_LIBRARY = {
+  'sample-1': { name: 'Audio waveform visualiser', source: '21st.dev', sourceUrl: 'https://21st.dev/components/waveform-example', code: '// example code\n<Waveform amplitude={amplitude} />', tags: ['audio', 'animation'], notes: 'Use during recording sessions.' },
+  'sample-2': { name: 'Card stack reveal', source: 'magicui.design', sourceUrl: 'https://magicui.design/docs/card-stack', code: '// example\n<CardStack items={cards} />', tags: ['cards', 'animation'], notes: 'Use for past sessions list.' },
+  'sample-3': { name: 'Hopper scroll effect', source: 'aceternity.com', sourceUrl: 'https://ui.aceternity.com/components/hopper-scroll', code: '// example\n<HopperScroll items={items} />', tags: ['scroll', 'hero'], notes: 'Hero section scroll-driven reveal.' },
+  'sample-4': { name: 'Soft pulse listening indicator', source: 'custom', sourceUrl: '', code: '<div className="pulse-dot" />', tags: ['audio', 'indicator'], notes: 'Single dot, slow opacity pulse.' },
+  'sample-5': { name: 'Animated counter', source: '21st.dev', sourceUrl: 'https://21st.dev/components/counter', code: '<AnimatedCounter from={0} to={100} />', tags: ['data', 'animation'], notes: 'For metric displays.' },
+  'sample-6': { name: 'Magnetic cursor', source: 'aceternity.com', sourceUrl: 'https://ui.aceternity.com/components/magnetic-cursor', code: '<MagneticCursor strength={0.4} />', tags: ['cursor', 'interaction'], notes: 'Apply on CTAs and key buttons.' }
+};
+
+function togglePick(card, name) {
+  const id = card.dataset.id;
+  card.classList.toggle('picked');
+  if (card.classList.contains('picked')) {
+    const sample = SAMPLE_LIBRARY[id] || { name };
+    state.library.selected.push({ id, ...sample });
+  } else {
+    state.library.selected = state.library.selected.filter(c => c.id !== id);
+  }
+  renderSelected();
+}
+
+function renderSelected() {
+  const list = document.getElementById('selected-list');
+  if (!list) return;
+  if (state.library.selected.length === 0) {
+    list.innerHTML = '<div class="library-selected-empty">Nothing picked yet</div>';
+    return;
+  }
+  list.innerHTML = state.library.selected.map(c => `
+    <div class="library-selected-item">
+      ${c.name}
+      <button onclick="unpick('${c.id}')">×</button>
+    </div>
+  `).join('');
+}
+
+function unpick(id) {
+  state.library.selected = state.library.selected.filter(c => c.id !== id);
+  const card = document.querySelector(`.library-card[data-id="${id}"]`);
+  if (card) card.classList.remove('picked');
+  renderSelected();
+}
+
+// ============================================================
+// Component drawer
+// ============================================================
+function openComponentDrawer() {
+  document.getElementById('drawer-backdrop').classList.add('open');
+  document.getElementById('component-drawer').classList.add('open');
+}
+function closeComponentDrawer() {
+  document.getElementById('drawer-backdrop').classList.remove('open');
+  document.getElementById('component-drawer').classList.remove('open');
+}
+function saveComponent() {
+  const name = document.getElementById('cmp-name').value.trim();
+  if (!name) { alert('Component needs a name'); return; }
+  // In the real app: write to IndexedDB, refresh the grid.
+  // For sketch purposes, show a confirmation.
+  closeComponentDrawer();
+  alert('Saved to library (sketch — in the real app this persists to IndexedDB and appears in the grid).');
+}
+
+// ============================================================
+// Library search filter
+// ============================================================
+const librarySearch = document.getElementById('library-search');
+if (librarySearch) {
+  librarySearch.addEventListener('input', () => {
+    const q = librarySearch.value.toLowerCase();
+    document.querySelectorAll('.library-card').forEach(card => {
+      const name = card.querySelector('.library-name').textContent.toLowerCase();
+      const tags = Array.from(card.querySelectorAll('.library-tags span')).map(t => t.textContent.toLowerCase()).join(' ');
+      const match = name.includes(q) || tags.includes(q);
+      card.style.display = match ? '' : 'none';
+    });
+  });
+}
+
+// ============================================================
+// Single-select grids
+// ============================================================
+document.querySelectorAll('[data-single-select]').forEach(grid => {
+  const key = grid.dataset.singleSelect;
+  grid.querySelectorAll('.choice-card, .color-tile, .mode-tile').forEach(card => {
+    card.addEventListener('click', () => {
+      grid.querySelectorAll('.choice-card, .color-tile, .mode-tile').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      const value = card.dataset.value;
+      // Map to state
+      if (key === 'platform') state.project.platform = value;
+      else if (key === 'vibe') state.vibe = value;
+      else if (key === 'accent') state.colour.accent = value;
+      else if (key === 'display-type') state.typography.display = value;
+      else if (key === 'body-type') state.typography.body = value;
+      else if (key === 'mode') state.mode = value;
+      else if (key === 'button-shape') state.shape.button = value;
+      else if (key === 'density') state.shape.density = value;
+      else if (key === 'shadow') state.shape.shadow = value;
+      else if (key === 'motion') state.shape.motion = value;
+      else if (key === 'primary-nav') state.navigation.primary = value;
+      else if (key === 'tooltip') state.navigation.tooltip = value;
+      else if (key === 'mobile-nav') state.navigation.mobile = value;
+      else if (key === 'form-layout') state.components.form = value;
+      else if (key === 'empty-state') state.components.empty = value;
+      else if (key === 'loading') state.components.loading = value;
+      else if (key === 'notifications') state.components.notification = value;
+      else if (key === 'admin') state.admin.scope = value;
+    });
+  });
+});
+
+// ============================================================
+// Multi-select tag clouds
+// ============================================================
+document.querySelectorAll('[data-multi-select]').forEach(cloud => {
+  const key = cloud.dataset.multiSelect;
+  const max = parseInt(cloud.dataset.max || '999', 10);
+  cloud.querySelectorAll('.tag').forEach(tag => {
+    tag.addEventListener('click', () => {
+      const selected = cloud.querySelectorAll('.tag.selected');
+      if (!tag.classList.contains('selected') && selected.length >= max) {
+        selected[0].classList.remove('selected');
+      }
+      tag.classList.toggle('selected');
+      const values = Array.from(cloud.querySelectorAll('.tag.selected')).map(t => t.dataset.value);
+      if (key === 'feeling') state.feeling = values;
+      else if (key === 'admin-extras') state.admin.extras = values;
+    });
+  });
+});
+
+// ============================================================
+// Toggle switches
+// ============================================================
+document.querySelectorAll('.toggle-switch[data-rule]').forEach(toggle => {
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('on');
+    state.rules[toggle.dataset.rule] = toggle.classList.contains('on');
+  });
+});
+
+// ============================================================
+// Free text inputs
+// ============================================================
+const bindText = (id, target) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', () => {
+    const path = target.split('.');
+    let obj = state;
+    for (let i = 0; i < path.length - 1; i++) obj = obj[path[i]];
+    obj[path[path.length - 1]] = el.value;
+  });
+};
+bindText('project-name', 'project.name');
+bindText('project-description', 'project.description');
+bindText('project-audience', 'project.audience');
+bindText('inspiration-urls', 'inspiration.urls');
+bindText('hex-paste', 'inspiration.hexes');
+bindText('custom-hex', 'colour.accent');
+bindText('secondary-accent', 'colour.secondary');
+bindText('hard-limits', 'hardLimits');
+bindText('anything-else', 'anythingElse');
+
+// ============================================================
+// File uploads
+// ============================================================
+function addUploadSlot(category) {
+  const grid = document.getElementById(category === 'inspiration' ? 'inspiration-uploads' : category === 'swatches' ? 'swatch-uploads' : 'font-uploads');
+  if (!grid) return;
+  const slot = document.createElement('label');
+  slot.className = 'upload-slot';
+  slot.innerHTML = `
+    <input type="file" accept="image/*" data-category="${category}" />
+    <button class="upload-remove" type="button">×</button>
+    <div class="upload-icon">+</div>
+    <div class="upload-text">Drop or click to upload</div>
+    <div class="upload-hint">PNG, JPG</div>`;
+  grid.appendChild(slot);
+  wireUploadSlot(slot);
+}
+
+function wireUploadSlot(slot) {
+  const input = slot.querySelector('input[type=file]');
+  const remove = slot.querySelector('.upload-remove');
+  input.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      slot.classList.add('has-file');
+      // Replace contents with image
+      const existingImg = slot.querySelector('img');
+      if (existingImg) existingImg.remove();
+      const img = document.createElement('img');
+      img.src = ev.target.result;
+      slot.insertBefore(img, slot.firstChild);
+      // Track in state
+      const cat = input.dataset.category;
+      const fileInfo = { name: file.name, size: file.size, type: file.type };
+      if (cat === 'inspiration') state.inspiration.files.push(fileInfo);
+      else if (cat === 'swatches') state.inspiration.swatches.push(fileInfo);
+      else if (cat === 'fonts') state.inspiration.fonts.push(fileInfo);
+    };
+    reader.readAsDataURL(file);
+  });
+  remove.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    slot.classList.remove('has-file');
+    const img = slot.querySelector('img');
+    if (img) img.remove();
+    input.value = '';
+    // Note: leaving state cleanup to a real impl
+  });
+}
+document.querySelectorAll('.upload-slot').forEach(wireUploadSlot);
+
+// ============================================================
+// Step rail navigation + progress
+// ============================================================
+document.querySelectorAll('.step-link').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const target = document.getElementById(link.dataset.target);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+// Active step on scroll
+const sectionIds = ['step-project', 'step-vibe', 'step-inspiration', 'step-feeling', 'step-colour', 'step-typography', 'step-mode', 'step-shape', 'step-navigation', 'step-components', 'step-rules', 'step-library', 'step-admin'];
+const updateActive = () => {
+  let active = 0;
+  for (let i = 0; i < sectionIds.length; i++) {
+    const el = document.getElementById(sectionIds[i]);
+    if (!el) continue;
+    const rect = el.getBoundingClientRect();
+    if (rect.top < 200) active = i;
+  }
+  document.querySelectorAll('.step-link').forEach((l, i) => l.classList.toggle('active', i === active));
+  document.getElementById('current-step').textContent = active + 1;
+  document.getElementById('action-step').textContent = active + 1;
+  document.getElementById('progress-fill').style.width = `${((active + 1) / 13) * 100}%`;
+};
+window.addEventListener('scroll', updateActive, { passive: true });
+updateActive();
+
+// ============================================================
+// Save / generate
+// ============================================================
+function saveDraft() {
+  localStorage.setItem('design-wizard-draft', JSON.stringify(state));
+  const btn = event.target;
+  const orig = btn.textContent;
+  btn.textContent = 'Saved ✓';
+  setTimeout(() => { btn.textContent = orig; }, 1600);
+}
+
+function loadDraft() {
+  const raw = localStorage.getItem('design-wizard-draft');
+  if (!raw) return;
+  try {
+    const saved = JSON.parse(raw);
+    Object.assign(state, saved);
+    // Note: a full implementation would also restore UI state. Skipped here.
+  } catch (e) {}
+}
+loadDraft();
+
+function generatePack() {
+  const prompt = buildPrompt();
+  document.getElementById('export-content').textContent = prompt;
+  document.getElementById('export-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('export-modal').classList.remove('open');
+}
+
+function copyExport() {
+  const text = document.getElementById('export-content').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => { btn.textContent = orig; }, 1600);
+  });
+}
+
+function downloadJSON() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `design-system-${(state.project.name || 'project').toLowerCase().replace(/\s+/g, '-')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// Build the Claude Desktop prompt — conforms to generation-specification.md
+// ============================================================
+function buildPrompt() {
+  const s = state;
+  const enabledRules = Object.entries(s.rules).filter(([k, v]) => v).map(([k]) => k);
+  const disabledRules = Object.entries(s.rules).filter(([k, v]) => !v).map(([k]) => k);
+
+  // Library section
+  let librarySection = '';
+  if (s.library.selected.length === 0) {
+    librarySection = '(none — no library components selected for this project)';
+  } else {
+    librarySection = s.library.selected.map(c => {
+      const adapted = (c.adaptedName || c.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const sourceSlug = c.source && c.source !== 'custom' ? '-' + c.source.replace(/[^a-z0-9]/gi, '').toLowerCase() : '';
+      const filename = `component-${adapted}${sourceSlug}.md`;
+      return `### ${c.name}
+- File to produce: \`${filename}\`
+- Adapted name: ${c.adaptedName || adapted}
+- Source: ${c.sourceUrl || c.source || '(custom)'}
+- Tags: ${(c.tags || []).join(', ') || '(none)'}
+- Notes: ${c.notes || '(none)'}
+${c.code ? `- Original code:\n\`\`\`\n${c.code}\n\`\`\`` : ''}`;
+    }).join('\n\n');
+  }
+
+  return `## INSTRUCTION TO CLAUDE DESKTOP
+
+You are a senior design systems specialist. The user has completed a structured wizard. Your job is to produce a complete bundle of design files based on their answers.
+
+The bundle must follow this structure exactly:
+- CLAUDE.md (project root entry)
+- DESIGN.md (orchestrator — references components, doesn't contain them)
+- tokens.md (all design tokens)
+- component-<name>.md (one per chosen library component, plus core components for chosen patterns)
+- ADMIN-SCAFFOLDING.md (if admin enabled)
+- mood-board.html (self-contained, all CSS inline)
+
+Rules for the bundle:
+- DESIGN.md must REFERENCE component files by name, not contain their code
+- Each library component selected by the user gets its own file: component-<adapted-name>[-source].md
+- Adapt library component code to use this project's tokens (replace hardcoded colours, fonts, spacing with token references)
+- Core components (button, input, card, navigation) also each get their own component-*.md file
+- Output each file as a separate code block, clearly labelled with a path comment at the top: <!-- File: /design/<name> -->
+- End with a short summary of what was produced and any tensions or decisions you had to make
+- Push back on tensions in the user's answers before generating
+
+---
+
+## PROJECT CONTEXT
+
+- Name: ${s.project.name || '(unnamed)'}
+- Description: ${s.project.description || '(none provided)'}
+- Platform: ${s.project.platform}
+- Audience: ${s.project.audience || '(not specified)'}
+
+## AESTHETIC
+
+- Vibe: **${s.vibe}**
+  - Implication: ${getVibeImplication(s.vibe)}
+- Feeling words: ${s.feeling.join(', ')}
+- Display type personality: **${s.typography.display}**
+- Body type personality: **${s.typography.body}**
+- Button shape: **${s.shape.button}**
+- Density: **${s.shape.density}**
+- Shadow philosophy: **${s.shape.shadow}**
+- Motion personality: **${s.shape.motion}**
+- Mode: **${s.mode}**
+
+## COLOUR
+
+- Accent primary: ${s.colour.accent}
+- Accent secondary: ${s.colour.secondary || '(none)'}
+- Pasted hex codes: ${s.inspiration.hexes || '(none)'}
+
+Reference: extract additional palette cues from inspiration files when available.
+
+## INSPIRATION
+
+URLs:
+${s.inspiration.urls || '(none)'}
+
+Files uploaded:
+- Visual references: ${s.inspiration.files.length} file(s)${s.inspiration.files.length > 0 ? ' — ' + s.inspiration.files.map(f => f.name).join(', ') : ''}
+- Colour swatches: ${s.inspiration.swatches.length} file(s)${s.inspiration.swatches.length > 0 ? ' — ' + s.inspiration.swatches.map(f => f.name).join(', ') : ''}
+- Font references: ${s.inspiration.fonts.length} file(s)${s.inspiration.fonts.length > 0 ? ' — ' + s.inspiration.fonts.map(f => f.name).join(', ') : ''}
+
+(In Claude Desktop, drag the actual image files into the chat alongside this prompt so you can see them.)
+
+## NAVIGATION & COMPONENTS
+
+- Primary navigation: **${s.navigation.primary}**
+- Tooltip behaviour: **${s.navigation.tooltip}**
+- Mobile navigation: **${s.navigation.mobile}**
+- Form layout: **${s.components.form}**
+- Empty state style: **${s.components.empty}**
+- Loading style: **${s.components.loading}**
+- Notification style: **${s.components.notification}**
+
+## LIBRARY COMPONENTS SELECTED FOR THIS PROJECT
+
+${librarySection}
+
+## HARD LIMITS (USER-SPECIFIC ANTI-PATTERNS)
+
+${s.hardLimits || '(none specified)'}
+
+## RULES
+
+ALWAYS-ON (locked, no exceptions):
+- No nested cards (cards inside cards)
+- WCAG AA contrast minimum (4.5:1 body, 3:1 large)
+- Body text minimum 14px
+- Animate transform/opacity only — never width/height/padding/margin
+- Every component has empty/loading/error states
+- If dual mode: both light and dark equally polished from day one
+
+NEGOTIABLE — ALLOWED in this project (user toggled on):
+${enabledRules.length > 0 ? enabledRules.map(r => `- ${r}`).join('\n') : '- (none)'}
+
+NEGOTIABLE — BANNED in this project (user left off):
+${disabledRules.map(r => `- ${r}`).join('\n')}
+
+## ADMIN
+
+Scope: **${s.admin.scope}**
+${s.admin.scope !== 'none' ? `
+Standard sections enabled:
+- LLM configuration (primary + backup model, failover rules, test playground)
+- Prompt + model binding (slug-based, with versioning and rollback)
+${s.admin.scope === 'full' ? `- User & role management (invite, suspend, change role)
+- Usage analytics & cost tracking (per-LLM, per-user, per-slug)
+- Content/output moderation (review queue, thresholds, override lists)` : '- (minimal admin — no user mgmt, usage, moderation)'}
+
+Optional sections enabled: ${s.admin.extras.length > 0 ? s.admin.extras.join(', ') : '(none)'}
+
+Architecture (fixed across all projects — don't redesign):
+- Admin lives at /admin URL path
+- Role-based middleware on every /admin/* route
+- Audit log on every write action
+- Slug-based prompt binding: products call llm.generate(slug, variables)
+- LLM client abstraction handles model selection, failover, logging
+- Same design tokens as consumer app, with compact density on tables` : ''}
+
+## ANYTHING ELSE FROM THE USER
+
+${s.anythingElse || '(nothing additional)'}
+
+---
+
+## OUTPUT REQUIREMENTS
+
+Produce the file bundle in this order:
+
+1. **CLAUDE.md** — project root entry telling Claude Code how to navigate the design files
+2. **DESIGN.md** — orchestrator that REFERENCES component files (does not contain code)
+3. **tokens.md** — all design tokens
+4. **Core component files** — at minimum: component-button.md, component-input.md, component-${s.navigation.primary}.md, component-card.md, component-form.md
+5. **Library component files** — one per item in the LIBRARY COMPONENTS SELECTED section above, with code adapted to use this project's tokens
+${s.admin.scope !== 'none' ? '6. **ADMIN-SCAFFOLDING.md** — admin architecture spec\n' : ''}${s.admin.scope !== 'none' ? '7' : '6'}. **mood-board.html** — single self-contained file rendering every choice live, with light/dark toggle if dual mode
+
+Each file in its own clearly labelled code block. Use file path comments at the top: \`<!-- File: /design/DESIGN.md -->\`.
+
+DESIGN.md must reference but not contain component code. Component code lives in component-*.md files only.
+
+Push back if my choices conflict — better to surface tensions now than after the spec is written.
+
+When done, end with a short summary of what was produced and any tensions or decisions you had to make.
+
+Ready when you are.`;
+}
+
+function getVibeImplication(vibe) {
+  const map = {
+    quiet: 'soft-minimal aesthetic, off-white canvas, refined sans, light shadows, generous whitespace, motion 200-280ms ease-out',
+    technical: 'near-black canvas, sharp grotesque sans, high-contrast accent, mono accents, motion 120-180ms ease-out, precise spacing',
+    editorial: 'earthy neutrals canvas with warmth, serif display, generous whitespace, magazine-like rhythm, motion 280-320ms emphatic ease',
+    bold: 'saturated accent, strong type contrast, decisive blocks, sharp corners, motion 150-200ms decisive',
+    playful: 'soft pastels, rounded shapes, expressive type, bouncy motion (hard rule against bounce relaxes), motion 240ms with spring',
+    luxurious: 'deep neutrals, restrained accent (often metallic), fine type, slow motion 320-480ms, generous spacing'
+  };
+  return map[vibe] || 'see vibe choice';
+}
+</script>
+</body>
+</html>
