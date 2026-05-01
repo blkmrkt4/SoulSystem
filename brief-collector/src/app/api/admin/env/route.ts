@@ -9,6 +9,7 @@ export async function GET() {
     hasApiKey: !!process.env.OPENROUTER_API_KEY,
     apiKey: process.env.OPENROUTER_API_KEY || '',
     model: process.env.OPENROUTER_MODEL || '',
+    envPath: ENV_PATH,
   });
 }
 
@@ -16,28 +17,33 @@ export async function POST(request: NextRequest) {
   try {
     const { apiKey, model } = await request.json();
 
-    // Read existing .env.local or start fresh
     let content = '';
     try {
       content = await readFile(ENV_PATH, 'utf-8');
     } catch {
-      // File doesn't exist yet
+      // File doesn't exist yet — will be created.
     }
 
-    // Update or add each key
     content = upsertEnvVar(content, 'OPENROUTER_API_KEY', apiKey || '');
     content = upsertEnvVar(content, 'OPENROUTER_MODEL', model || '');
 
     await writeFile(ENV_PATH, content, 'utf-8');
 
-    // Update process.env so the current server session picks it up immediately
-    if (apiKey) process.env.OPENROUTER_API_KEY = apiKey;
-    if (model) process.env.OPENROUTER_MODEL = model;
+    // Mutate process.env so the next request in this process sees the new value
+    // even if the dev-server restart triggered by writing .env.local hasn't
+    // completed yet.
+    if (typeof apiKey === 'string') process.env.OPENROUTER_API_KEY = apiKey;
+    if (typeof model === 'string') process.env.OPENROUTER_MODEL = model;
 
-    return NextResponse.json({ ok: true });
+    console.log(
+      `[admin/env] wrote ${ENV_PATH} (apiKey=${apiKey ? apiKey.slice(0, 12) + '…' : 'empty'}, model=${model || 'empty'})`
+    );
+
+    return NextResponse.json({ ok: true, envPath: ENV_PATH });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error('[admin/env] save failed:', message);
+    return NextResponse.json({ error: message, envPath: ENV_PATH }, { status: 500 });
   }
 }
 

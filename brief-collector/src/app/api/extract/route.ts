@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const slug = formData.get('slug') as string | null;
-    const apiKey = (formData.get('apiKey') as string | null) || process.env.OPENROUTER_API_KEY || null;
-    const model = (formData.get('model') as string | null) || process.env.OPENROUTER_MODEL || null;
+    const apiKey = process.env.OPENROUTER_API_KEY || null;
+    const model = process.env.OPENROUTER_MODEL || null;
     const prompt = formData.get('prompt') as string | null;
 
     await log('Params received', {
@@ -52,10 +52,10 @@ export async function POST(request: NextRequest) {
         prompt: !prompt,
       };
       await log('Missing required fields', missing);
-      return NextResponse.json(
-        { error: 'Missing required fields: file, slug, apiKey, model, prompt', missing },
-        { status: 400 }
-      );
+      const error = !apiKey || !model
+        ? 'OPENROUTER_API_KEY / OPENROUTER_MODEL not set in .env.local — open /admin to configure'
+        : 'Missing required fields: file, slug, prompt';
+      return NextResponse.json({ error, missing }, { status: 400 });
     }
 
     // Convert file to base64 for vision API

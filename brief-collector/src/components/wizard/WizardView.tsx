@@ -4,6 +4,7 @@ import { useEffect, useCallback, useState, useMemo } from 'react';
 import { useApp } from '@/lib/context';
 import { detectTensions } from '@/lib/tensions';
 import { TensionContext } from '@/lib/tension-context';
+import { serializeForDisk } from '@/lib/design-definition';
 import StepProject from './steps/StepProject';
 import StepVibe from './steps/StepVibe';
 import StepInspiration from './steps/StepInspiration';
@@ -35,9 +36,16 @@ const STEPS = [
   { id: 'step-admin', label: 'Admin', num: 13 },
 ];
 
+type SaveStatus =
+  | { kind: 'idle' }
+  | { kind: 'saving' }
+  | { kind: 'saved'; path: string; uploadCount: number }
+  | { kind: 'error'; message: string };
+
 export function WizardView() {
   const { state, dispatch } = useApp();
   const [showExport, setShowExport] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>({ kind: 'idle' });
 
   // Compute tensions on every wizard state change
   const tensions = useMemo(
@@ -74,6 +82,41 @@ export function WizardView() {
   const startNewDraft = () => {
     dispatch({ type: 'NEW_DRAFT' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const projectName = state.wizardState.project.name.trim();
+  const canSave = projectName.length > 0 && saveStatus.kind !== 'saving';
+
+  const handleSaveDraft = async () => {
+    if (!canSave) return;
+    setSaveStatus({ kind: 'saving' });
+    try {
+      const selectedIds = state.wizardState.library.selectedIds;
+      const { definition, filesToWrite } = serializeForDisk(
+        state.wizardState,
+        selectedIds,
+        0
+      );
+
+      const formData = new FormData();
+      formData.append('definition', JSON.stringify(definition));
+      for (const { diskFilename, blob } of filesToWrite) {
+        formData.append(`file:${diskFilename}`, blob, diskFilename);
+      }
+
+      const res = await fetch('/api/project/save', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+      setSaveStatus({ kind: 'saved', path: data.path, uploadCount: data.uploadCount });
+      setTimeout(() => setSaveStatus({ kind: 'idle' }), 4000);
+    } catch (err) {
+      setSaveStatus({
+        kind: 'error',
+        message: err instanceof Error ? err.message : 'Save failed',
+      });
+      setTimeout(() => setSaveStatus({ kind: 'idle' }), 5000);
+    }
   };
 
   // Steps that have at least one tension (for rail indicators)
@@ -159,6 +202,18 @@ export function WizardView() {
                 {tensionCount} tension{tensionCount > 1 ? 's' : ''}
               </span>
             )}
+            {saveStatus.kind === 'saved' && (
+              <span className="text-emerald-600">
+                Saved to {saveStatus.path.replace(/^.*\/SoulSystem\//, '~/Documents/SoulSystem/')}
+                {saveStatus.uploadCount > 0 && ` (${saveStatus.uploadCount} files)`}
+              </span>
+            )}
+            {saveStatus.kind === 'error' && (
+              <span className="text-danger">Save failed: {saveStatus.message}</span>
+            )}
+            {saveStatus.kind === 'idle' && !projectName && (
+              <span className="text-amber-600">Add a project name (Step 1) to save</span>
+            )}
           </div>
           <div className="flex gap-2.5">
             <button
@@ -166,6 +221,22 @@ export function WizardView() {
               className="h-10 px-4 text-sm font-medium rounded-lg border border-border-strong bg-surface text-text hover:bg-surface-alt transition-colors"
             >
               New draft
+            </button>
+            <button
+              onClick={handleSaveDraft}
+              disabled={!canSave}
+              title={
+                projectName
+                  ? 'Save current progress to disk — works at any stage'
+                  : 'Enter a project name first'
+              }
+              className="h-10 px-4 text-sm font-medium rounded-lg border border-border-strong bg-surface text-text hover:bg-surface-alt transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saveStatus.kind === 'saving'
+                ? 'Saving...'
+                : saveStatus.kind === 'saved'
+                ? 'Saved'
+                : 'Save draft'}
             </button>
             <button
               onClick={() => setShowExport(true)}

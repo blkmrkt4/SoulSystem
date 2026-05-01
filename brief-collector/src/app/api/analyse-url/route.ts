@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'No API key configured — set OPENROUTER_API_KEY in .env.local or /admin' },
+        { error: 'No API key configured — set OPENROUTER_API_KEY in .env.local or via /admin' },
         { status: 400 }
       );
     }

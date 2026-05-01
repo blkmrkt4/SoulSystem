@@ -4,8 +4,6 @@ import { useState, useRef } from 'react';
 import { useApp } from '@/lib/context';
 import { StepSection, SubStep } from '@/components/ui/StepSection';
 import { ChoiceCard } from '@/components/ui/ChoiceCard';
-import { runExtraction } from '@/lib/extraction';
-import { getAdminSettings } from '@/lib/db';
 
 const VIBES = [
   {
@@ -96,16 +94,9 @@ export default function StepVibe() {
     setDeriveError(null);
     setDeriveResult(null);
     try {
-      const settings = await getAdminSettings();
-      if (!settings.openRouterApiKey) {
-        throw new Error('No API key configured — go to /admin to set your OpenRouter key.');
-      }
-
       const formData = new FormData();
       formData.append('file', file, file.name);
       formData.append('slug', 'vibe-derive');
-      formData.append('apiKey', settings.openRouterApiKey);
-      formData.append('model', settings.model);
       formData.append('prompt', VIBE_DERIVE_PROMPT);
 
       const res = await fetch('/api/extract', { method: 'POST', body: formData });

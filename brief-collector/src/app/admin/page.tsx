@@ -6,9 +6,16 @@ import { DEFAULT_ADMIN_SETTINGS } from '@/lib/types';
 import { getAdminSettings, saveAdminSettings } from '@/lib/db';
 import { ModelPicker } from '@/components/admin/ModelPicker';
 
+type SaveState =
+  | { kind: 'idle' }
+  | { kind: 'saving' }
+  | { kind: 'saved'; envPath?: string }
+  | { kind: 'error'; message: string };
+
 export default function AdminPage() {
   const [settings, setSettings] = useState<AdminSettings | null>(null);
-  const [saved, setSaved] = useState(false);
+  const [saveState, setSaveState] = useState<SaveState>({ kind: 'idle' });
+  const [envPath, setEnvPath] = useState<string | null>(null);
   const [testStatus, setTestStatus] = useState<string | null>(null);
 
   useEffect(() => {
@@ -17,13 +24,10 @@ export default function AdminPage() {
         getAdminSettings(),
         fetch('/api/admin/env').then((r) => r.json()).catch(() => ({})),
       ]);
-      // If IndexedDB has no API key but .env.local does, use the env value
-      if (!dbSettings.openRouterApiKey && envRes.apiKey) {
-        dbSettings.openRouterApiKey = envRes.apiKey;
-      }
-      if (dbSettings.model === DEFAULT_ADMIN_SETTINGS.model && envRes.model) {
-        dbSettings.model = envRes.model;
-      }
+      // .env.local is the source of truth for the API key and model — always override IndexedDB.
+      dbSettings.openRouterApiKey = envRes.apiKey || '';
+      if (envRes.model) dbSettings.model = envRes.model;
+      if (envRes.envPath) setEnvPath(envRes.envPath);
       setSettings(dbSettings);
     }
     load();
@@ -38,18 +42,35 @@ export default function AdminPage() {
   }
 
   const handleSave = async () => {
-    await saveAdminSettings(settings);
-    // Also persist API key and model to .env.local so they survive IndexedDB resets
-    await fetch('/api/admin/env', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        apiKey: settings.openRouterApiKey,
-        model: settings.model,
-      }),
-    });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setSaveState({ kind: 'saving' });
+    try {
+      // Write the API key + model to .env.local first. The route also mutates
+      // process.env so the running server picks up the change immediately.
+      const res = await fetch('/api/admin/env', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: settings.openRouterApiKey,
+          model: settings.model,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+
+      // Other admin settings (extraction prompts, etc.) still live in IndexedDB.
+      await saveAdminSettings(settings);
+
+      if (data.envPath) setEnvPath(data.envPath);
+      setSaveState({ kind: 'saved', envPath: data.envPath });
+      setTimeout(() => setSaveState({ kind: 'idle' }), 4000);
+    } catch (err) {
+      setSaveState({
+        kind: 'error',
+        message: err instanceof Error ? err.message : 'Save failed',
+      });
+    }
   };
 
   const updateSlug = (index: number, partial: Partial<ExtractionSlug>) => {
@@ -138,7 +159,11 @@ export default function AdminPage() {
           <span className="text-text-subtle" style={{ fontFamily: 'var(--font-mono)', fontSize: '12px' }}>
             openrouter.ai/keys
           </span>
-          . Stored locally in your browser only.
+          . Saved to{' '}
+          <span className="text-text-subtle" style={{ fontFamily: 'var(--font-mono)', fontSize: '12px' }}>
+            .env.local
+          </span>
+          {' '}on the server — applied immediately.
         </p>
         <div className="flex gap-2 max-w-lg">
           <input
@@ -264,17 +289,38 @@ export default function AdminPage() {
 
       {/* Save */}
       <div
-        className="sticky bottom-0 py-4 flex gap-3 justify-end border-t border-border"
+        className="sticky bottom-0 py-4 flex gap-3 items-center justify-end border-t border-border"
         style={{
           background: 'color-mix(in srgb, var(--color-canvas) 92%, transparent)',
           backdropFilter: 'blur(8px)',
         }}
       >
+        {saveState.kind === 'saved' && (
+          <span className="text-xs text-emerald-600">
+            Wrote{' '}
+            <span style={{ fontFamily: 'var(--font-mono)' }}>
+              {saveState.envPath?.replace(/^.*\/brief-collector\//, '') || '.env.local'}
+            </span>
+          </span>
+        )}
+        {saveState.kind === 'error' && (
+          <span className="text-xs text-danger">Save failed: {saveState.message}</span>
+        )}
+        {saveState.kind === 'idle' && envPath && (
+          <span className="text-xs text-text-subtle" style={{ fontFamily: 'var(--font-mono)' }}>
+            {envPath.replace(/^.*\/brief-collector\//, '')}
+          </span>
+        )}
         <button
           onClick={handleSave}
-          className="h-10 px-5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent/90 transition-colors"
+          disabled={saveState.kind === 'saving'}
+          className="h-10 px-5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent/90 transition-colors disabled:opacity-50"
         >
-          {saved ? 'Saved!' : 'Save settings'}
+          {saveState.kind === 'saving'
+            ? 'Saving...'
+            : saveState.kind === 'saved'
+            ? 'Saved'
+            : 'Save settings'}
         </button>
       </div>
     </div>

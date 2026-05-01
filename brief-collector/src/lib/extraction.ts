@@ -18,21 +18,9 @@ export async function runExtraction(
     };
   }
 
-  if (!settings.openRouterApiKey) {
-    return {
-      slug,
-      sourceFileId: fileId,
-      sourceFileName: fileName,
-      status: 'error',
-      error: 'No API key configured. Go to /admin to set your OpenRouter key.',
-    };
-  }
-
   const formData = new FormData();
   formData.append('file', file, fileName);
   formData.append('slug', slug);
-  formData.append('apiKey', settings.openRouterApiKey);
-  formData.append('model', settings.model);
   formData.append('prompt', slugConfig.prompt);
 
   try {
